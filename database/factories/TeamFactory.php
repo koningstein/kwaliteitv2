@@ -9,16 +9,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TeamFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
             'name' => $this->faker->unique()->randomElement([
-                'Software development', 'System engineer', 'Medewerker ict', 'Laboratorium engineer',
+                'Software Development',
+                'System & Network Engineering',
+                'Medewerker ICT',
+                'Laboratorium Engineer',
+                'Data Science & AI',
+                'Cybersecurity',
+                'Cloud Engineering',
+                'Business IT & Management',
+                'Smart Technology',
+                'Game Development',
             ]),
         ];
     }

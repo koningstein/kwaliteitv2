@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class TeamUpdateRequest extends FormRequest
+class LocationUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,9 +15,8 @@ class TeamUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('teams', 'name')->ignore($this->team)],
-            'locations' => ['nullable', 'array'],
-            'locations.*' => ['exists:locations,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'abbreviation' => ['required', 'string', 'max:10', Rule::unique('locations', 'abbreviation')->ignore($this->location)],
         ];
     }
 }

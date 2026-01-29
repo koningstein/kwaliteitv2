@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(php artisan:*)",
+      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan make:migration create_locations_table)",
+      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan migrate)",
+      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan route:list --path=admin)",
+      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan migrate:fresh --seed)",
+      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan tinker:*)"
+    ]
+  }
+}

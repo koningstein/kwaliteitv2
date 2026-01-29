@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Team;
+use App\Models\Location;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class TeamSearch extends Component
+class LocationSearch extends Component
 {
     use WithPagination;
 
@@ -19,15 +19,15 @@ class TeamSearch extends Component
 
     public function render()
     {
-        $teams = Team::query()
+        $locations = Location::query()
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('abbreviation', 'like', '%' . $this->search . '%');
             })
-            ->with('locations')
-            ->withCount(['users', 'leaders'])
+            ->withCount(['teams', 'users'])
             ->orderBy('name')
             ->paginate(10);
 
-        return view('livewire.admin.team-search', compact('teams'));
+        return view('livewire.admin.location-search', compact('locations'));
     }
 }

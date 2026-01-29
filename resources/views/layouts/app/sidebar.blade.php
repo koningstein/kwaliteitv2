@@ -21,6 +21,9 @@
                     <flux:sidebar.item icon="users" :href="route('admin.teams.index')" :current="request()->routeIs('admin.teams.*')" wire:navigate>
                         {{ __('Teams') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="map-pin" :href="route('admin.locations.index')" :current="request()->routeIs('admin.locations.*')" wire:navigate>
+                        {{ __('Locaties') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

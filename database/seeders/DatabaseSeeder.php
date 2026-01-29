@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
             StandardSeeder::class,
         ]);
 
-        // 3. Teams en Gebruikers
-        // De actiepunten worden nu pas aangemaakt in de TeamSeeder
+        // 3. Locaties, Teams en Gebruikers
+        $this->call(LocationSeeder::class);
         $this->call(TeamSeeder::class);
 
         // 4. Scores (nu er Criteria en Users zijn)

@@ -1,8 +1,22 @@
 <x-layouts::app :title="$team->name">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div class="flex items-center justify-between">
-            <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{{ $team->name }}</h1>
+            <div>
+                <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{{ $team->name }}</h1>
+                @if($team->locations->isNotEmpty())
+                    <div class="mt-1 flex flex-wrap gap-1">
+                        @foreach($team->locations as $location)
+                            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30">
+                                {{ $location->abbreviation }} &mdash; {{ $location->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
             <div class="flex items-center gap-3">
+                <a href="{{ route('admin.teams.members', $team) }}" class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" wire:navigate>
+                    Leden beheren
+                </a>
                 <a href="{{ route('admin.teams.edit', $team) }}" class="inline-flex items-center rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-600" wire:navigate>
                     Bewerken
                 </a>
@@ -13,9 +27,9 @@
         </div>
 
         <div class="grid gap-4 md:grid-cols-2">
-            {{-- Teamleden --}}
+            {{-- Docenten --}}
             <div class="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
-                <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Teamleden</h2>
+                <h2 class="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Docenten</h2>
                 @if($team->users->isNotEmpty())
                     <ul class="space-y-2">
                         @foreach($team->users as $user)
@@ -31,7 +45,7 @@
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Geen teamleden toegevoegd.</p>
+                    <p class="text-sm text-zinc-500 dark:text-zinc-400">Geen docenten toegevoegd.</p>
                 @endif
             </div>
 

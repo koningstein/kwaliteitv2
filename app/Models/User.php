@@ -74,6 +74,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Team::class, 'team_leader_teams');
     }
 
+    public function locations(): BelongsToMany
+    {
+        return $this->belongsToMany(Location::class);
+    }
+
     public function actionPoints(): HasMany
     {
         return $this->hasMany(ActionPoint::class);

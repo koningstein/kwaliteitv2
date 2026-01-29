@@ -27,46 +27,33 @@
                     @enderror
                 </div>
 
-                <div class="mb-4">
-                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Teamleden</label>
-                    <div class="max-h-48 overflow-y-auto rounded-lg border border-zinc-300 p-2 dark:border-zinc-600">
-                        @foreach($users as $user)
-                            <label class="flex items-center gap-2 rounded px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                                <input
-                                    type="checkbox"
-                                    name="users[]"
-                                    value="{{ $user->id }}"
-                                    {{ in_array($user->id, old('users', $team->users->pluck('id')->toArray())) ? 'checked' : '' }}
-                                    class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
-                                />
-                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $user->name }}</span>
-                                <span class="text-xs text-zinc-400">{{ $user->email }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('users')
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <div class="mb-6">
-                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Teamleiders</label>
-                    <div class="max-h-48 overflow-y-auto rounded-lg border border-zinc-300 p-2 dark:border-zinc-600">
-                        @foreach($users as $user)
-                            <label class="flex items-center gap-2 rounded px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                                <input
-                                    type="checkbox"
-                                    name="leaders[]"
-                                    value="{{ $user->id }}"
-                                    {{ in_array($user->id, old('leaders', $team->leaders->pluck('id')->toArray())) ? 'checked' : '' }}
-                                    class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
-                                />
-                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $user->name }}</span>
-                                <span class="text-xs text-zinc-400">{{ $user->email }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('leaders')
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Locaties</label>
+                    @if($locations->isNotEmpty())
+                        <div class="space-y-1 rounded-lg border border-zinc-300 p-3 dark:border-zinc-600">
+                            @foreach($locations as $location)
+                                <label class="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                                    <input
+                                        type="checkbox"
+                                        name="locations[]"
+                                        value="{{ $location->id }}"
+                                        {{ in_array($location->id, old('locations', $team->locations->pluck('id')->toArray())) ? 'checked' : '' }}
+                                        class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
+                                    />
+                                    <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30">
+                                        {{ $location->abbreviation }}
+                                    </span>
+                                    <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $location->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                            Geen locaties beschikbaar.
+                            <a href="{{ route('admin.locations.create') }}" class="text-blue-600 hover:underline dark:text-blue-400" wire:navigate>Maak eerst een locatie aan.</a>
+                        </p>
+                    @endif
+                    @error('locations')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
                 </div>
