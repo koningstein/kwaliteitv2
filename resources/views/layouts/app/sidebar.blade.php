@@ -16,6 +16,12 @@
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Beheer')" class="grid">
+                    <flux:sidebar.item icon="users" :href="route('admin.teams.index')" :current="request()->routeIs('admin.teams.*')" wire:navigate>
+                        {{ __('Teams') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
             </flux:sidebar.nav>
 
             <flux:spacer />

@@ -1,0 +1,85 @@
+<x-layouts::app :title="__('Team bewerken')">
+    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+        <div class="flex items-center justify-between">
+            <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Team bewerken: {{ $team->name }}</h1>
+            <a href="{{ route('admin.teams.index') }}" class="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" wire:navigate>
+                &larr; Terug naar overzicht
+            </a>
+        </div>
+
+        <div class="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
+            <form action="{{ route('admin.teams.update', $team) }}" method="POST">
+                @csrf
+                @method('PUT')
+
+                <div class="mb-4">
+                    <label for="name" class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Naam</label>
+                    <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        value="{{ old('name', $team->name) }}"
+                        class="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
+                        required
+                    />
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Teamleden</label>
+                    <div class="max-h-48 overflow-y-auto rounded-lg border border-zinc-300 p-2 dark:border-zinc-600">
+                        @foreach($users as $user)
+                            <label class="flex items-center gap-2 rounded px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                                <input
+                                    type="checkbox"
+                                    name="users[]"
+                                    value="{{ $user->id }}"
+                                    {{ in_array($user->id, old('users', $team->users->pluck('id')->toArray())) ? 'checked' : '' }}
+                                    class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
+                                />
+                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $user->name }}</span>
+                                <span class="text-xs text-zinc-400">{{ $user->email }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('users')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mb-6">
+                    <label class="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Teamleiders</label>
+                    <div class="max-h-48 overflow-y-auto rounded-lg border border-zinc-300 p-2 dark:border-zinc-600">
+                        @foreach($users as $user)
+                            <label class="flex items-center gap-2 rounded px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                                <input
+                                    type="checkbox"
+                                    name="leaders[]"
+                                    value="{{ $user->id }}"
+                                    {{ in_array($user->id, old('leaders', $team->leaders->pluck('id')->toArray())) ? 'checked' : '' }}
+                                    class="rounded border-zinc-300 text-blue-600 focus:ring-blue-500 dark:border-zinc-600"
+                                />
+                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $user->name }}</span>
+                                <span class="text-xs text-zinc-400">{{ $user->email }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('leaders')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                        Team bijwerken
+                    </button>
+                    <a href="{{ route('admin.teams.index') }}" class="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" wire:navigate>
+                        Annuleren
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</x-layouts::app>

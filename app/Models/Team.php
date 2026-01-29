@@ -12,7 +12,7 @@ class Team extends Model
     /** @use HasFactory<\Database\Factories\TeamFactory> */
     use HasFactory;
 
-    protected $guarded = ['id', 'name', 'created_at', 'updated_at'];
+    protected $fillable = ['name'];
 
     public function users(): BelongsToMany
     {

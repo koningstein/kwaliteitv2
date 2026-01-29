@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwaliteit in Beeld - Prototype</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Teamleden lijst
+        const TEAM_MEMBERS = [
+            'Marcel Koningstein',
+            'Pete Berkhout',
+            'Rodney Rusland',
+            'Cassandra van Gessel',
+            'Jimmy Timmermans',
+            'Jason van Schaik',
+            'Halima el Omari',
+            'Soaad Zaaj'
+        ].sort(); // Alfabetisch gesorteerd
+
+        // Lucide React icons as inline SVG components
+        const ChevronRight = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        );
+
+        const ChevronDown = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        );
+
+        const Check = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        );
+
+        const AlertCircle = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        );
+
+        const X = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        );
+
+        const Edit2 = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+            </svg>
+        );
+
+        const Save = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+        );
+
+        const BarChart3 = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M3 3v18h18"></path>
+                <path d="M18 17V9"></path>
+                <path d="M13 17V5"></path>
+                <path d="M8 17v-3"></path>
+            </svg>
+        );
+
+        const FileText = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        );
+
+        const FileSpreadsheet = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="8" y1="13" x2="16" y2="13"></line>
+                <line x1="8" y1="17" x2="16" y2="17"></line>
+                <line x1="12" y1="9" x2="12" y2="21"></line>
+            </svg>
+        );
+
+        // Sample data
+        const qualityData = {
+            themes: [
+                {
+                    id: 'OP',
+                    name: 'Onderwijsproces',
+                    color: '#2563eb',
+                    standards: [
+                        {
+                            id: 'OP0',
+                            name: 'Basisvaardigheden',
+                            description: 'Het onderwijs in basisvaardigheden bereidt de studenten voor op het vervolgonderwijs, de arbeidsmarkt en de samenleving.',
+                            criteria: [
+                                {
+                                    id: 'OP0-1',
+                                    number: 1,
+                                    text: 'Het onderwijsprogramma voor Nederlandse taal is dekkend voor het referentieniveaus dat is vastgesteld voor het betreffende opleidingsniveau.',
+                                    status: 'attention',
+                                    indicators: [
+                                        'Het curriculum bevat leerdoelen die volledig aansluiten op en corresponderen met de vereiste referentieniveaus (2F/3F)',
+                                        'In het programma zijn voldoende lesuren gepland voor Nederlands',
+                                        'Er is een lesplan',
+                                        'Er is een toets- en examenplan',
+                                        'Het toets- en examenplan is voorafgaand aan de onderwijsactiviteiten doorgenomen met de student',
+                                        'De opleiding biedt extra ondersteuning aan studenten die achterstanden of specifieke leerbehoeften hebben'
+                                    ],
+                                    explanation: 'Extra ondersteuning studenten met achterstanden of specifieke leerbehoeften onvoldoende voor N3 en N4.',
+                                    years: { 2025: 'attention', 2026: null, 2027: null },
+                                    actionPoints: [
+                                        {
+                                            id: 'ap1',
+                                            description: 'Extra ondersteuningsprogramma ontwikkelen voor N3/N4 studenten',
+                                            responsible: 'Jan de Vries',
+                                            startDate: '2026-01-01',
+                                            endDate: '2026-03-01',
+                                            status: 'on_track',
+                                            evaluation: 'De eerste versie van het ondersteuningsprogramma is ontwikkeld en wordt getest.'
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 'OP0-2',
+                                    number: 2,
+                                    text: 'Het onderwijsprogramma voor Engelse taal is dekkend voor het referentieniveau dat is vastgesteld voor niveau 4.',
+                                    status: 'attention',
+                                    indicators: [
+                                        'Het curriculum bevat leerdoelen die volledig aansluiten op en corresponderen met de vereiste referentieniveaus (A2/B1)',
+                                        'In het programma zijn voldoende lesuren gepland voor Engelse taal',
+                                        'Er is een lesplan',
+                                        'Er is een toets- en examenplan',
+                                        'Het toets- en examenplan is voorafgaand aan de onderwijsactiviteiten doorgenomen met de student'
+                                    ],
+                                    explanation: '',
+                                    years: { 2025: 'attention', 2026: null, 2027: null },
+                                    actionPoints: []
+                                },
+                                {
+                                    id: 'OP0-3',
+                                    number: 3,
+                                    text: 'Het onderwijsprogramma voor rekenen is dekkend voor het rekenniveau dat is vastgesteld voor het betreffende opleidingsniveau.',
+                                    status: 'sufficient',
+                                    indicators: [
+                                        'Het curriculum bevat leerdoelen die volledig aansluiten op en corresponderen met de vereiste rekenniveaus',
+                                        'In het programma zijn voldoende lesuren gepland voor rekenen',
+                                        'Er is een lesplan',
+                                        'Er is een toets- en examenplan'
+                                    ],
+                                    explanation: '',
+                                    years: { 2025: 'sufficient', 2026: null, 2027: null },
+                                    actionPoints: []
+                                }
+                            ]
+                        },
+                        {
+                            id: 'OP1',
+                            name: 'Aanbod',
+                            description: 'Het onderwijsaanbod sluit aan op de kwalificatie-eisen.',
+                            criteria: []
+                        }
+                    ]
+                },
+                {
+                    id: 'VS',
+                    name: 'Veiligheid en schoolklimaat',
+                    color: '#16a34a',
+                    standards: [
+                        {
+                            id: 'VS1',
+                            name: 'Veiligheid',
+                            description: 'De opleiding biedt een veilige leeromgeving.',
+                            criteria: []
+                        }
+                    ]
+                },
+                {
+                    id: 'BA',
+                    name: 'Borging en afsluiting',
+                    color: '#dc2626',
+                    standards: [
+                        {
+                            id: 'BA1',
+                            name: 'Borging diplomering',
+                            description: 'De opleiding borgt de kwaliteit van de diplomering.',
+                            criteria: []
+                        }
+                    ]
+                },
+                {
+                    id: 'OR',
+                    name: 'Onderwijsresultaten',
+                    color: '#ca8a04',
+                    standards: [
+                        {
+                            id: 'OR1',
+                            name: 'Studiesucces',
+                            description: 'Studenten behalen hun diploma binnen de gestelde termijn.',
+                            criteria: []
+                        }
+                    ]
+                },
+                {
+                    id: 'SKA',
+                    name: 'Sturen, kwaliteitszorg en ambitie',
+                    color: '#7c3aed',
+                    standards: [
+                        {
+                            id: 'SKA1',
+                            name: 'Visie, ambities en doelen',
+                            description: 'De opleiding heeft een duidelijke visie en ambities.',
+                            criteria: []
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Team Overview Component (voorheen PersonenOverview)
+        const PersonenOverview = ({ data, onBack }) => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedPerson, setSelectedPerson] = useState(null);
+            
+            // Verzamel alle actiepunten gegroepeerd per persoon
+            const personenMap = new Map();
+            
+            data.themes.forEach(theme => {
+                theme.standards.forEach(standard => {
+                    standard.criteria.forEach(criterion => {
+                        if (criterion.actionPoints && criterion.actionPoints.length > 0) {
+                            criterion.actionPoints.forEach(ap => {
+                                const responsible = ap.responsible || 'Onbekend';
+                                
+                                if (!personenMap.has(responsible)) {
+                                    personenMap.set(responsible, []);
+                                }
+                                
+                                personenMap.get(responsible).push({
+                                    ...ap,
+                                    themeName: theme.name,
+                                    themeId: theme.id,
+                                    themeColor: theme.color,
+                                    standardName: standard.name,
+                                    criterionNumber: criterion.number,
+                                    criterionText: criterion.text
+                                });
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Converteer Map naar gesorteerde array
+            const allPersonen = Array.from(personenMap.entries())
+                .map(([name, actionPoints]) => ({
+                    name,
+                    actionPoints,
+                    stats: {
+                        total: actionPoints.length,
+                        notStarted: actionPoints.filter(ap => (ap.status || 'not_started') === 'not_started').length,
+                        onTrack: actionPoints.filter(ap => ap.status === 'on_track').length,
+                        delayed: actionPoints.filter(ap => ap.status === 'delayed').length,
+                        postponed: actionPoints.filter(ap => ap.status === 'postponed').length,
+                        completed: actionPoints.filter(ap => ap.status === 'completed').length
+                    }
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            // Filter op zoekterm
+            const personen = searchTerm 
+                ? allPersonen.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                : allPersonen;
+
+            const getStatusConfig = (status) => {
+                const configs = {
+                    not_started: { label: 'Niet gestart', color: 'bg-slate-100 text-slate-700 border-slate-300' },
+                    on_track: { label: 'Op schema', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    delayed: { label: 'Loopt achter', color: 'bg-amber-100 text-amber-700 border-amber-300' },
+                    postponed: { label: 'Uitgesteld', color: 'bg-orange-100 text-orange-700 border-orange-300' },
+                    completed: { label: 'Afgerond', color: 'bg-blue-100 text-blue-700 border-blue-300' }
+                };
+                return configs[status] || configs.not_started;
+            };
+
+            const formatDateRange = (startDate, endDate) => {
+                const end = new Date(endDate);
+                const endStr = end.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+                return `Deadline: ${endStr}`;
+            };
+
+            // Als een persoon is geselecteerd, toon detail view
+            if (selectedPerson) {
+                const persoon = allPersonen.find(p => p.name === selectedPerson);
+                
+                return (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => setSelectedPerson(null)}
+                                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                                >
+                                    <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                                        {persoon.name.substring(0, 2).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-900">{persoon.name}</h2>
+                                        <p className="text-slate-600">{persoon.stats.total} {persoon.stats.total === 1 ? 'actiepunt' : 'actiepunten'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={onBack}
+                                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+                            >
+                                ← Terug naar Dashboard
+                            </button>
+                        </div>
+
+                        {/* Statistieken */}
+                        <div className="flex flex-wrap gap-2">
+                            {persoon.stats.notStarted > 0 && (
+                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-slate-100 text-slate-700 border border-slate-300">
+                                    {persoon.stats.notStarted} Niet gestart
+                                </span>
+                            )}
+                            {persoon.stats.onTrack > 0 && (
+                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700 border border-emerald-300">
+                                    {persoon.stats.onTrack} Op schema
+                                </span>
+                            )}
+                            {persoon.stats.delayed > 0 && (
+                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-amber-100 text-amber-700 border border-amber-300">
+                                    {persoon.stats.delayed} Loopt achter
+                                </span>
+                            )}
+                            {persoon.stats.postponed > 0 && (
+                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-orange-100 text-orange-700 border border-orange-300">
+                                    {persoon.stats.postponed} Uitgesteld
+                                </span>
+                            )}
+                            {persoon.stats.completed > 0 && (
+                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-700 border border-blue-300">
+                                    {persoon.stats.completed} Afgerond
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Actiepunten lijst */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-slate-900 mb-4">Actiepunten:</h3>
+                            <div className="space-y-3">
+                                {persoon.actionPoints
+                                    .sort((a, b) => {
+                                        if (a.status === 'completed' && b.status !== 'completed') return 1;
+                                        if (a.status !== 'completed' && b.status === 'completed') return -1;
+                                        return new Date(a.endDate) - new Date(b.endDate);
+                                    })
+                                    .map((ap, apIdx) => {
+                                        const statusConfig = getStatusConfig(ap.status || 'not_started');
+                                        const isCompleted = ap.status === 'completed';
+                                        const isOverdue = !isCompleted && new Date(ap.endDate) < new Date();
+                                        
+                                        return (
+                                            <div 
+                                                key={apIdx}
+                                                className={`p-4 rounded-lg border-2 ${isCompleted ? 'bg-emerald-50 border-emerald-200' : isOverdue ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div 
+                                                        className="w-1 h-full rounded flex-shrink-0"
+                                                        style={{ backgroundColor: ap.themeColor, minHeight: '60px' }}
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-start justify-between gap-3 mb-2">
+                                                            <div className="flex-1">
+                                                                <div className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded inline-block mb-2">
+                                                                    {ap.themeId} → {ap.standardName} → Criterium {ap.criterionNumber}
+                                                                </div>
+                                                                <h5 className={`font-bold text-sm mb-1 ${isCompleted ? 'text-emerald-900' : isOverdue ? 'text-red-900' : 'text-slate-900'}`}>
+                                                                    {isCompleted && <span className="mr-1">✓</span>}
+                                                                    {isOverdue && !isCompleted && <span className="mr-1">⚠️</span>}
+                                                                    {ap.description}
+                                                                </h5>
+                                                                <p className="text-xs text-slate-600 mb-2">{ap.criterionText}</p>
+                                                            </div>
+                                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.color} flex-shrink-0`}>
+                                                                {statusConfig.label}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div className={`text-xs ${isCompleted ? 'text-emerald-700' : isOverdue ? 'text-red-700 font-semibold' : 'text-slate-600'}`}>
+                                                            {formatDateRange(ap.startDate, ap.endDate)}
+                                                            {isOverdue && !isCompleted && <span className="ml-2">(Verlopen!)</span>}
+                                                        </div>
+
+                                                        {ap.evaluation && (
+                                                            <div className={`mt-2 pt-2 border-t ${isCompleted ? 'border-emerald-200' : 'border-slate-200'}`}>
+                                                                <p className={`text-xs font-semibold mb-1 ${isCompleted ? 'text-emerald-800' : 'text-slate-700'}`}>Evaluatie:</p>
+                                                                <p className={`text-xs italic ${isCompleted ? 'text-emerald-700' : 'text-slate-600'}`}>{ap.evaluation}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Grid overview
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-900">Team Overzicht</h2>
+                            <p className="text-slate-600 mt-1">{allPersonen.length} {allPersonen.length === 1 ? 'teamlid' : 'teamleden'} met actiepunten</p>
+                        </div>
+                        <button
+                            onClick={onBack}
+                            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+                        >
+                            ← Terug naar Dashboard
+                        </button>
+                    </div>
+
+                    {/* Zoekbalk */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Zoek teamlid..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full md:w-96 px-4 py-3 pl-11 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                        />
+                        <svg className="w-5 h-5 text-slate-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+
+                    {personen.length === 0 ? (
+                        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                            <p className="text-slate-500 text-lg">
+                                {searchTerm ? `Geen teamleden gevonden voor "${searchTerm}"` : 'Geen teamleden met actiepunten gevonden'}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {personen.map((persoon, idx) => {
+                                const hasUrgent = persoon.actionPoints.some(ap => 
+                                    ap.status !== 'completed' && new Date(ap.endDate) < new Date()
+                                );
+                                
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedPerson(persoon.name)}
+                                        className="bg-white rounded-xl border-2 border-slate-200 p-5 hover:border-blue-400 hover:shadow-lg transition-all text-left group"
+                                    >
+                                        {/* Avatar en naam */}
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
+                                                {persoon.name.substring(0, 2).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                                                    {persoon.name}
+                                                </h3>
+                                                <p className="text-xs text-slate-500">
+                                                    {persoon.stats.total} {persoon.stats.total === 1 ? 'actiepunt' : 'actiepunten'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Urgentie indicator */}
+                                        {hasUrgent && (
+                                            <div className="mb-3 px-2 py-1 bg-red-100 border border-red-300 rounded-lg flex items-center gap-1.5">
+                                                <span className="text-red-700 font-bold text-xs">⚠️</span>
+                                                <span className="text-red-700 font-semibold text-xs">Verlopende deadlines!</span>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Compacte statistieken */}
+                                        <div className="space-y-1.5">
+                                            {persoon.stats.notStarted > 0 && (
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-slate-600">Niet gestart</span>
+                                                    <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{persoon.stats.notStarted}</span>
+                                                </div>
+                                            )}
+                                            {persoon.stats.onTrack > 0 && (
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-slate-600">Op schema</span>
+                                                    <span className="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">{persoon.stats.onTrack}</span>
+                                                </div>
+                                            )}
+                                            {persoon.stats.delayed > 0 && (
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-slate-600">Loopt achter</span>
+                                                    <span className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">{persoon.stats.delayed}</span>
+                                                </div>
+                                            )}
+                                            {persoon.stats.postponed > 0 && (
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-slate-600">Uitgesteld</span>
+                                                    <span className="font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded">{persoon.stats.postponed}</span>
+                                                </div>
+                                            )}
+                                            {persoon.stats.completed > 0 && (
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="text-slate-600">Afgerond</span>
+                                                    <span className="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">{persoon.stats.completed}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Klik indicator */}
+                                        <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-center gap-2 text-xs text-slate-500 group-hover:text-blue-600 transition-colors">
+                                            <span>Bekijk details</span>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Action Points Overview Component
+        const ActionPointsOverview = ({ data, filter, onBack }) => {
+            const allActionPoints = [];
+            
+            data.themes.forEach(theme => {
+                theme.standards.forEach(standard => {
+                    standard.criteria.forEach(criterion => {
+                        if (criterion.actionPoints && criterion.actionPoints.length > 0) {
+                            criterion.actionPoints.forEach(ap => {
+                                allActionPoints.push({
+                                    ...ap,
+                                    themeName: theme.name,
+                                    themeId: theme.id,
+                                    themeColor: theme.color,
+                                    standardName: standard.name,
+                                    criterionNumber: criterion.number,
+                                    criterionText: criterion.text
+                                });
+                            });
+                        }
+                    });
+                });
+            });
+
+            const filteredActionPoints = filter === 'all' 
+                ? allActionPoints 
+                : allActionPoints.filter(ap => (ap.status || 'not_started') === filter);
+
+            const getStatusConfig = (status) => {
+                const configs = {
+                    not_started: { label: 'Niet gestart', color: 'bg-slate-100 text-slate-700 border-slate-300' },
+                    on_track: { label: 'Op schema', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    delayed: { label: 'Loopt achter', color: 'bg-amber-100 text-amber-700 border-amber-300' },
+                    postponed: { label: 'Uitgesteld', color: 'bg-orange-100 text-orange-700 border-orange-300' },
+                    completed: { label: 'Afgerond', color: 'bg-blue-100 text-blue-700 border-blue-300' }
+                };
+                return configs[status] || configs.not_started;
+            };
+
+            const formatDateRange = (startDate, endDate) => {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const startStr = start.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+                const endStr = end.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+                
+                if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                    return startStr;
+                }
+                
+                return `${startStr} t/m ${endStr}`;
+            };
+
+            const filterLabels = {
+                all: 'Alle Actiepunten',
+                not_started: 'Niet Gestart',
+                on_track: 'Op Schema',
+                delayed: 'Loopt Achter',
+                postponed: 'Uitgesteld',
+                completed: 'Afgerond'
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-900">{filterLabels[filter]}</h2>
+                            <p className="text-slate-600 mt-1">{filteredActionPoints.length} {filteredActionPoints.length === 1 ? 'actiepunt' : 'actiepunten'}</p>
+                        </div>
+                        <button
+                            onClick={onBack}
+                            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+                        >
+                            ← Terug naar Dashboard
+                        </button>
+                    </div>
+
+                    {filteredActionPoints.length === 0 ? (
+                        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+                            <p className="text-slate-500 text-lg">Geen actiepunten gevonden met deze filter</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {filteredActionPoints.map((ap, idx) => {
+                                const statusConfig = getStatusConfig(ap.status || 'not_started');
+                                const isCompleted = ap.status === 'completed';
+                                
+                                return (
+                                    <div 
+                                        key={idx} 
+                                        className={`p-5 rounded-xl border-2 shadow-sm ${isCompleted ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200'}`}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div 
+                                                className="w-1 h-full rounded"
+                                                style={{ backgroundColor: ap.themeColor, minHeight: '60px' }}
+                                            />
+                                            <div className="flex-1">
+                                                <div className="flex items-start justify-between gap-4 mb-3">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                                                                {ap.themeId} → {ap.standardName} → Criterium {ap.criterionNumber}
+                                                            </span>
+                                                        </div>
+                                                        <h3 className={`text-lg font-bold mb-2 ${isCompleted ? 'text-emerald-900' : 'text-slate-900'}`}>
+                                                            {isCompleted && <span className="mr-1">✓</span>}
+                                                            {ap.description}
+                                                        </h3>
+                                                        <p className="text-sm text-slate-600 mb-3">{ap.criterionText}</p>
+                                                    </div>
+                                                    <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${statusConfig.color}`}>
+                                                        {statusConfig.label}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                                    <div>
+                                                        <span className="font-medium text-slate-700">Verantwoordelijke:</span>
+                                                        <p className={isCompleted ? 'text-emerald-700' : 'text-slate-600'}>{ap.responsible}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-medium text-slate-700">Periode:</span>
+                                                        <p className={isCompleted ? 'text-emerald-700' : 'text-slate-600'}>{formatDateRange(ap.startDate, ap.endDate)}</p>
+                                                    </div>
+                                                </div>
+
+                                                {ap.evaluation && (
+                                                    <div className="mt-3 pt-3 border-t" style={{ borderColor: isCompleted ? '#a7f3d0' : '#e2e8f0' }}>
+                                                        <p className={`text-xs font-semibold mb-1 ${isCompleted ? 'text-emerald-800' : 'text-slate-700'}`}>Evaluatie:</p>
+                                                        <p className={`text-sm italic ${isCompleted ? 'text-emerald-700' : 'text-slate-600'}`}>{ap.evaluation}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Dashboard Component
+        const Dashboard = ({ data, onExportPDF, onExportExcel, onViewActionPoints }) => {
+            const calculateStats = () => {
+                const stats = {
+                    byYear: {},
+                    byTheme: {},
+                    actionPoints: {
+                        total: 0,
+                        notStarted: 0,
+                        onTrack: 0,
+                        delayed: 0,
+                        postponed: 0,
+                        completed: 0
+                    }
+                };
+
+                ['2025', '2026', '2027'].forEach(year => {
+                    stats.byYear[year] = { sufficient: 0, attention: 0, insufficient: 0, total: 0 };
+                });
+
+                data.themes.forEach(theme => {
+                    stats.byTheme[theme.id] = { sufficient: 0, attention: 0, insufficient: 0, total: 0, name: theme.name, color: theme.color };
+                    
+                    theme.standards.forEach(standard => {
+                        standard.criteria.forEach(criterion => {
+                            Object.entries(criterion.years).forEach(([year, status]) => {
+                                if (status) {
+                                    stats.byYear[year][status]++;
+                                    stats.byYear[year].total++;
+                                }
+                            });
+
+                            const status2025 = criterion.years['2025'];
+                            if (status2025) {
+                                stats.byTheme[theme.id][status2025]++;
+                                stats.byTheme[theme.id].total++;
+                            }
+
+                            if (criterion.actionPoints) {
+                                criterion.actionPoints.forEach(ap => {
+                                    stats.actionPoints.total++;
+                                    const apStatus = ap.status || 'not_started';
+                                    stats.actionPoints[apStatus === 'not_started' ? 'notStarted' : 
+                                                    apStatus === 'on_track' ? 'onTrack' : 
+                                                    apStatus === 'delayed' ? 'delayed' : 
+                                                    apStatus === 'postponed' ? 'postponed' : 'completed']++;
+                                });
+                            }
+                        });
+                    });
+                });
+
+                return stats;
+            };
+
+            const stats = calculateStats();
+
+            const StatCard = ({ title, value, icon: Icon, color, subtitle, onClick }) => (
+                <button
+                    onClick={onClick}
+                    className={`p-6 rounded-xl border-2 ${color} bg-white shadow-sm hover:shadow-md transition-all text-left w-full ${onClick ? 'cursor-pointer hover:scale-105' : ''}`}
+                >
+                    <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-sm font-medium text-slate-600">{title}</h3>
+                        <Icon size={20} className="text-slate-400" />
+                    </div>
+                    <p className="text-3xl font-bold text-slate-900">{value}</p>
+                    {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
+                    {onClick && <p className="text-xs text-blue-600 mt-2">↗ Bekijk details</p>}
+                </button>
+            );
+
+            const ProgressBar = ({ sufficient, attention, insufficient, total }) => {
+                if (total === 0) return <div className="text-sm text-slate-400">Geen data</div>;
+                
+                const sufficientPct = (sufficient / total) * 100;
+                const attentionPct = (attention / total) * 100;
+                const insufficientPct = (insufficient / total) * 100;
+
+                return (
+                    <div className="space-y-2">
+                        <div className="flex gap-1 h-8 rounded-lg overflow-hidden">
+                            {sufficient > 0 && (
+                                <div 
+                                    className="bg-emerald-500 flex items-center justify-center text-white text-xs font-medium"
+                                    style={{ width: `${sufficientPct}%` }}
+                                >
+                                    {sufficient > 0 && `${sufficient}`}
+                                </div>
+                            )}
+                            {attention > 0 && (
+                                <div 
+                                    className="bg-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                                    style={{ width: `${attentionPct}%` }}
+                                >
+                                    {attention > 0 && `${attention}`}
+                                </div>
+                            )}
+                            {insufficient > 0 && (
+                                <div 
+                                    className="bg-rose-500 flex items-center justify-center text-white text-xs font-medium"
+                                    style={{ width: `${insufficientPct}%` }}
+                                >
+                                    {insufficient > 0 && `${insufficient}`}
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-between text-xs text-slate-600">
+                            <span>🟢 {sufficient} Voldoende ({Math.round(sufficientPct)}%)</span>
+                            <span>🟠 {attention} Aandacht ({Math.round(attentionPct)}%)</span>
+                            <span>🔴 {insufficient} Onvoldoende ({Math.round(insufficientPct)}%)</span>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex gap-3">
+                        <button
+                            onClick={onExportPDF}
+                            className="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors font-medium flex items-center gap-2 shadow-sm"
+                        >
+                            <FileText size={18} />
+                            Exporteer naar PDF
+                        </button>
+                        <button
+                            onClick={onExportExcel}
+                            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center gap-2 shadow-sm"
+                        >
+                            <FileSpreadsheet size={18} />
+                            Exporteer naar Excel
+                        </button>
+                    </div>
+
+                    <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <StatCard 
+                            title="Totaal Actiepunten" 
+                            value={stats.actionPoints.total} 
+                            icon={BarChart3} 
+                            color="border-slate-200"
+                            onClick={() => onViewActionPoints('all')}
+                        />
+                        <StatCard 
+                            title="Niet Gestart" 
+                            value={stats.actionPoints.notStarted} 
+                            icon={AlertCircle} 
+                            color="border-slate-300"
+                            onClick={() => onViewActionPoints('not_started')}
+                        />
+                        <StatCard 
+                            title="Op Schema" 
+                            value={stats.actionPoints.onTrack} 
+                            icon={Check} 
+                            color="border-emerald-300"
+                            onClick={() => onViewActionPoints('on_track')}
+                        />
+                        <StatCard 
+                            title="Loopt Achter" 
+                            value={stats.actionPoints.delayed} 
+                            icon={AlertCircle} 
+                            color="border-amber-300"
+                            onClick={() => onViewActionPoints('delayed')}
+                        />
+                        <StatCard 
+                            title="Uitgesteld" 
+                            value={stats.actionPoints.postponed} 
+                            icon={AlertCircle} 
+                            color="border-orange-300"
+                            onClick={() => onViewActionPoints('postponed')}
+                        />
+                        <StatCard 
+                            title="Afgerond" 
+                            value={stats.actionPoints.completed} 
+                            icon={Check} 
+                            color="border-blue-300"
+                            onClick={() => onViewActionPoints('completed')}
+                        />
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                        <h2 className="text-xl font-bold text-slate-900 mb-6">Voortgang per Jaar</h2>
+                        <div className="space-y-6">
+                            {Object.entries(stats.byYear).map(([year, yearStats]) => (
+                                <div key={year}>
+                                    <h3 className="text-lg font-semibold text-slate-800 mb-3">{year}</h3>
+                                    <ProgressBar {...yearStats} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                        <h2 className="text-xl font-bold text-slate-900 mb-6">Voortgang per Thema (2025)</h2>
+                        <div className="space-y-6">
+                            {Object.entries(stats.byTheme).map(([themeId, themeStats]) => (
+                                <div key={themeId}>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-1 h-6 rounded" style={{ backgroundColor: themeStats.color }} />
+                                        <h3 className="text-lg font-semibold text-slate-800">{themeId}. {themeStats.name}</h3>
+                                    </div>
+                                    <ProgressBar {...themeStats} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // CriterionCard Component (truncated for brevity - includes full implementation)
+        const CriterionCard = ({ criterion, onUpdateExplanation, onUpdateStatus, onUpdateActionPoints }) => {
+            const [isExpanded, setIsExpanded] = useState(false);
+            const [isEditing, setIsEditing] = useState(false);
+            const [editValue, setEditValue] = useState(criterion.explanation);
+            const [actionPoints, setActionPoints] = useState(criterion.actionPoints || []);
+            const [newActionPoint, setNewActionPoint] = useState({ description: '', responsible: '', startDate: '', endDate: '', status: 'not_started', evaluation: '' });
+            const [showActionForm, setShowActionForm] = useState(false);
+            const [editingActionPoint, setEditingActionPoint] = useState(null);
+
+            const handleSave = () => {
+                onUpdateExplanation(criterion.id, editValue);
+                setIsEditing(false);
+            };
+
+            const handleStatusChange = (year, status) => {
+                onUpdateStatus(criterion.id, year, status);
+            };
+
+            const handleAddActionPoint = () => {
+                if (newActionPoint.description && newActionPoint.responsible && newActionPoint.startDate && newActionPoint.endDate) {
+                    const updatedActionPoints = [...actionPoints, { ...newActionPoint, id: `ap${Date.now()}` }];
+                    setActionPoints(updatedActionPoints);
+                    onUpdateActionPoints(criterion.id, updatedActionPoints);
+                    setNewActionPoint({ description: '', responsible: '', startDate: '', endDate: '', status: 'not_started', evaluation: '' });
+                    setShowActionForm(false);
+                    
+                    // Check en update toekomstige jaren
+                    checkAndUpdateFutureYears(updatedActionPoints);
+                }
+            };
+
+            const handleDeleteActionPoint = (apId) => {
+                const updatedActionPoints = actionPoints.filter(ap => ap.id !== apId);
+                setActionPoints(updatedActionPoints);
+                onUpdateActionPoints(criterion.id, updatedActionPoints);
+                
+                // Check en update toekomstige jaren
+                checkAndUpdateFutureYears(updatedActionPoints);
+            };
+
+            // Helper functie om 2026 en 2027 automatisch groen te maken als alle actiepunten afgerond zijn
+            const checkAndUpdateFutureYears = (actionPointsList) => {
+                const allCompleted = actionPointsList.length > 0 && actionPointsList.every(point => point.status === 'completed');
+                if (allCompleted) {
+                    // Update alleen toekomstige jaren (2026, 2027), niet 2025
+                    // Ook als ze null zijn, dan maken we ze groen
+                    ['2026', '2027'].forEach(year => {
+                        handleStatusChange(year, 'sufficient');
+                    });
+                }
+            };
+
+            const formatDateRange = (startDate, endDate) => {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const startStr = start.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+                const endStr = end.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+                
+                if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                    return startStr;
+                }
+                
+                return `${startStr} t/m ${endStr}`;
+            };
+
+            const getStatusConfig = (status) => {
+                const configs = {
+                    not_started: { label: 'Niet gestart', color: 'bg-slate-100 text-slate-700 border-slate-300' },
+                    on_track: { label: 'Op schema', color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+                    delayed: { label: 'Loopt achter', color: 'bg-amber-100 text-amber-700 border-amber-300' },
+                    postponed: { label: 'Uitgesteld', color: 'bg-orange-100 text-orange-700 border-orange-300' },
+                    completed: { label: 'Afgerond', color: 'bg-blue-100 text-blue-700 border-blue-300' }
+                };
+                return configs[status] || configs.not_started;
+            };
+
+            const StatusButton = ({ status, currentStatus, onClick }) => {
+                const colors = {
+                    sufficient: 'bg-emerald-500 hover:bg-emerald-600 ring-emerald-400',
+                    attention: 'bg-amber-500 hover:bg-amber-600 ring-amber-400',
+                    insufficient: 'bg-rose-500 hover:bg-rose-600 ring-rose-400'
+                };
+                
+                const isActive = currentStatus === status;
+                const colorClass = colors[status];
+                
+                return (
+                    <button
+                        onClick={onClick}
+                        className={`w-8 h-8 rounded-full transition-all ${colorClass} ${isActive ? 'ring-4 scale-110' : 'opacity-40 hover:opacity-70'}`}
+                        title={status === 'sufficient' ? 'Voldoende' : status === 'attention' ? 'Aandachtspunt' : 'Onvoldoende'}
+                    />
+                );
+            };
+
+            const needsActionPoints = Object.values(criterion.years).some(
+                status => status === 'attention' || status === 'insufficient'
+            );
+
+            return (
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="p-5 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                    {isExpanded ? <ChevronDown size={20} className="text-slate-400 flex-shrink-0" /> : <ChevronRight size={20} className="text-slate-400 flex-shrink-0" />}
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-sm font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                                                Criterium {criterion.number}
+                                            </span>
+                                        </div>
+                                        <h4 className="font-semibold text-slate-900 leading-snug">{criterion.text}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-4 items-center" onClick={(e) => e.stopPropagation()}>
+                                {Object.entries(criterion.years).map(([year, status]) => (
+                                    <div key={year} className="flex flex-col items-center gap-1.5">
+                                        <span className="text-xs font-semibold text-slate-600">{year}</span>
+                                        <div className="flex gap-1.5">
+                                            <StatusButton status="sufficient" currentStatus={status} onClick={() => handleStatusChange(year, 'sufficient')} />
+                                            <StatusButton status="attention" currentStatus={status} onClick={() => handleStatusChange(year, 'attention')} />
+                                            <StatusButton status="insufficient" currentStatus={status} onClick={() => handleStatusChange(year, 'insufficient')} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {criterion.explanation && !isExpanded && (
+                            <div className="ml-8 mt-2">
+                                <p className="text-sm text-slate-600 italic">{criterion.explanation}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {isExpanded && (
+                        <div className="px-5 pb-5 border-t border-slate-100 pt-4" onClick={(e) => e.stopPropagation()}>
+                            <div className="space-y-4">
+                                <div>
+                                    <h5 className="text-sm font-semibold text-slate-700 mb-3">Indicatoren:</h5>
+                                    <ul className="space-y-2">
+                                        {criterion.indicators.map((indicator, idx) => (
+                                            <li key={idx} className="flex gap-2 text-sm text-slate-600">
+                                                <span className="text-slate-400 font-medium">•</span>
+                                                <span>{indicator}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="pt-3 border-t border-slate-100">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h5 className="text-sm font-semibold text-slate-700">Toelichting:</h5>
+                                        {!isEditing && (
+                                            <button onClick={() => setIsEditing(true)} className="text-blue-600 hover:text-blue-700 p-1.5 rounded-lg hover:bg-blue-50 transition-colors">
+                                                <Edit2 size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {isEditing ? (
+                                        <div className="space-y-2">
+                                            <textarea
+                                                value={editValue}
+                                                onChange={(e) => setEditValue(e.target.value)}
+                                                className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[100px]"
+                                                placeholder="Voeg een toelichting toe..."
+                                            />
+                                            <div className="flex gap-2">
+                                                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2">
+                                                    <Save size={16} />
+                                                    Opslaan
+                                                </button>
+                                                <button onClick={() => { setIsEditing(false); setEditValue(criterion.explanation); }} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
+                                                    Annuleren
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-slate-600 italic">
+                                            {criterion.explanation || 'Geen toelichting toegevoegd'}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {(needsActionPoints || actionPoints.length > 0) && (
+                                    <div className="pt-3 border-t border-slate-100">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h5 className="text-sm font-semibold text-slate-700">
+                                                Actiepunten:
+                                                {actionPoints.length > 0 && actionPoints.every(ap => ap.status === 'completed') && (
+                                                    <span className="ml-2 text-xs font-normal text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                                                        ✓ Alle actiepunten afgerond
+                                                    </span>
+                                                )}
+                                            </h5>
+                                            {needsActionPoints && (
+                                                <button onClick={() => setShowActionForm(!showActionForm)} className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                                                    + Actiepunt toevoegen
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {showActionForm && (
+                                            <div className="mb-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 mb-1">Beschrijving actiepunt</label>
+                                                        <textarea
+                                                            value={newActionPoint.description}
+                                                            onChange={(e) => setNewActionPoint({ ...newActionPoint, description: e.target.value })}
+                                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                            placeholder="Wat moet er gebeuren?"
+                                                            rows={2}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 mb-1">Verantwoordelijke</label>
+                                                        <select
+                                                            value={newActionPoint.responsible}
+                                                            onChange={(e) => setNewActionPoint({ ...newActionPoint, responsible: e.target.value })}
+                                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                                        >
+                                                            <option value="">-- Selecteer een persoon --</option>
+                                                            {TEAM_MEMBERS.map((member, idx) => (
+                                                                <option key={idx} value={member}>{member}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-slate-700 mb-1">Startdatum</label>
+                                                            <input
+                                                                type="date"
+                                                                value={newActionPoint.startDate}
+                                                                onChange={(e) => setNewActionPoint({ ...newActionPoint, startDate: e.target.value })}
+                                                                className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-slate-700 mb-1">Einddatum</label>
+                                                            <input
+                                                                type="date"
+                                                                value={newActionPoint.endDate}
+                                                                onChange={(e) => setNewActionPoint({ ...newActionPoint, endDate: e.target.value })}
+                                                                className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={handleAddActionPoint} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                                                            Toevoegen
+                                                        </button>
+                                                        <button onClick={() => { setShowActionForm(false); setNewActionPoint({ description: '', responsible: '', startDate: '', endDate: '', status: 'not_started', evaluation: '' }); }} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">
+                                                            Annuleren
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {actionPoints.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {actionPoints.map((ap) => {
+                                                    const isEditingThis = editingActionPoint === ap.id;
+                                                    const statusConfig = getStatusConfig(ap.status || 'not_started');
+                                                    const isCompleted = ap.status === 'completed';
+                                                    
+                                                    return (
+                                                        <div key={ap.id} className={`p-4 rounded-lg ${isCompleted ? 'bg-emerald-50 border-2 border-emerald-200' : 'bg-white border-2 border-slate-200'}`}>
+                                                            {isEditingThis ? (
+                                                                <div className="space-y-3">
+                                                                    <div>
+                                                                        <label className="block text-sm font-medium text-slate-700 mb-1">Beschrijving actiepunt</label>
+                                                                        <textarea
+                                                                            value={ap.description}
+                                                                            onChange={(e) => {
+                                                                                const updated = actionPoints.map(item => 
+                                                                                    item.id === ap.id ? { ...item, description: e.target.value } : item
+                                                                                );
+                                                                                setActionPoints(updated);
+                                                                            }}
+                                                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                            rows={2}
+                                                                        />
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-sm font-medium text-slate-700 mb-1">Verantwoordelijke</label>
+                                                                        <select
+                                                                            value={ap.responsible}
+                                                                            onChange={(e) => {
+                                                                                const updated = actionPoints.map(item => 
+                                                                                    item.id === ap.id ? { ...item, responsible: e.target.value } : item
+                                                                                );
+                                                                                setActionPoints(updated);
+                                                                            }}
+                                                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                                                        >
+                                                                            <option value="">-- Selecteer een persoon --</option>
+                                                                            {TEAM_MEMBERS.map((member, idx) => (
+                                                                                <option key={idx} value={member}>{member}</option>
+                                                                            ))}
+                                                                        </select>
+                                                                    </div>
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        <div>
+                                                                            <label className="block text-sm font-medium text-slate-700 mb-1">Startdatum</label>
+                                                                            <input
+                                                                                type="date"
+                                                                                value={ap.startDate}
+                                                                                onChange={(e) => {
+                                                                                    const updated = actionPoints.map(item => 
+                                                                                        item.id === ap.id ? { ...item, startDate: e.target.value } : item
+                                                                                    );
+                                                                                    setActionPoints(updated);
+                                                                                }}
+                                                                                className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="block text-sm font-medium text-slate-700 mb-1">Einddatum</label>
+                                                                            <input
+                                                                                type="date"
+                                                                                value={ap.endDate}
+                                                                                onChange={(e) => {
+                                                                                    const updated = actionPoints.map(item => 
+                                                                                        item.id === ap.id ? { ...item, endDate: e.target.value } : item
+                                                                                    );
+                                                                                    setActionPoints(updated);
+                                                                                }}
+                                                                                className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                                                                        <select
+                                                                            value={ap.status || 'not_started'}
+                                                                            onChange={(e) => {
+                                                                                const updated = actionPoints.map(item => 
+                                                                                    item.id === ap.id ? { ...item, status: e.target.value } : item
+                                                                                );
+                                                                                setActionPoints(updated);
+                                                                                
+                                                                                // Check of alle actiepunten nu afgerond zijn
+                                                                                const allCompleted = updated.every(point => point.status === 'completed');
+                                                                                if (allCompleted && updated.length > 0) {
+                                                                                    // Update alleen toekomstige jaren (2026, 2027)
+                                                                                    ['2026', '2027'].forEach(year => {
+                                                                                        handleStatusChange(year, 'sufficient');
+                                                                                    });
+                                                                                }
+                                                                            }}
+                                                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                        >
+                                                                            <option value="not_started">Niet gestart</option>
+                                                                            <option value="on_track">Op schema</option>
+                                                                            <option value="delayed">Loopt achter</option>
+                                                                            <option value="postponed">Uitgesteld</option>
+                                                                            <option value="completed">Afgerond</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="block text-sm font-medium text-slate-700 mb-1">Evaluatie / Toelichting</label>
+                                                                        <textarea
+                                                                            value={ap.evaluation || ''}
+                                                                            onChange={(e) => {
+                                                                                const updated = actionPoints.map(item => 
+                                                                                    item.id === ap.id ? { ...item, evaluation: e.target.value } : item
+                                                                                );
+                                                                                setActionPoints(updated);
+                                                                            }}
+                                                                            className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                                            placeholder="Wat is de huidige stand van zaken?"
+                                                                            rows={3}
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex gap-2 pt-2">
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                onUpdateActionPoints(criterion.id, actionPoints);
+                                                                                setEditingActionPoint(null);
+                                                                                
+                                                                                // Als alle actiepunten afgerond zijn, maak dan alleen 2026 en 2027 groen
+                                                                                // 2025 blijft de oorspronkelijke status behouden (oranje/rood) als historisch record
+                                                                                const allCompleted = actionPoints.every(point => point.status === 'completed');
+                                                                                if (allCompleted && actionPoints.length > 0) {
+                                                                                    // Update alleen toekomstige jaren (2026, 2027)
+                                                                                    ['2026', '2027'].forEach(year => {
+                                                                                        handleStatusChange(year, 'sufficient');
+                                                                                    });
+                                                                                }
+                                                                            }}
+                                                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium flex items-center gap-2"
+                                                                        >
+                                                                            <Save size={16} />
+                                                                            Opslaan
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setActionPoints(criterion.actionPoints || []);
+                                                                                setEditingActionPoint(null);
+                                                                            }}
+                                                                            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
+                                                                        >
+                                                                            Annuleren
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div>
+                                                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                                                        <div className="flex-1">
+                                                                            <p className={`text-sm font-semibold mb-2 ${isCompleted ? 'text-emerald-900' : 'text-slate-900'}`}>
+                                                                                {isCompleted && <span className="mr-1">✓</span>}
+                                                                                {ap.description}
+                                                                            </p>
+                                                                            <div className="flex flex-wrap gap-3 text-xs mb-2" style={{ color: isCompleted ? '#065f46' : '#475569' }}>
+                                                                                <span className="flex items-center gap-1">
+                                                                                    <span className="font-medium">Verantwoordelijke:</span> {ap.responsible}
+                                                                                </span>
+                                                                                <span className="flex items-center gap-1">
+                                                                                    <span className="font-medium">Periode:</span> {formatDateRange(ap.startDate, ap.endDate)}
+                                                                                </span>
+                                                                            </div>
+                                                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.color}`}>
+                                                                                {statusConfig.label}
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex gap-1">
+                                                                            <button
+                                                                                onClick={() => setEditingActionPoint(ap.id)}
+                                                                                className="text-blue-600 hover:text-blue-700 p-1.5 rounded hover:bg-blue-50 transition-colors"
+                                                                                title="Bewerken"
+                                                                            >
+                                                                                <Edit2 size={16} />
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => handleDeleteActionPoint(ap.id)}
+                                                                                className="text-rose-600 hover:text-rose-700 p-1.5 rounded hover:bg-rose-50 transition-colors"
+                                                                                title="Verwijderen"
+                                                                            >
+                                                                                <X size={16} />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                    {ap.evaluation && (
+                                                                        <div className="pt-2 border-t" style={{ borderColor: isCompleted ? '#a7f3d0' : '#e2e8f0' }}>
+                                                                            <p className={`text-xs font-medium mb-1 ${isCompleted ? 'text-emerald-800' : 'text-slate-700'}`}>Evaluatie:</p>
+                                                                            <p className={`text-sm italic ${isCompleted ? 'text-emerald-700' : 'text-slate-600'}`}>{ap.evaluation}</p>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-slate-500 italic">Nog geen actiepunten toegevoegd</p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // StandardSection Component
+        const StandardSection = ({ standard, themeColor, onUpdateExplanation, onUpdateStatus, onUpdateActionPoints }) => {
+            const [isExpanded, setIsExpanded] = useState(false);
+
+            return (
+                <div className="mb-4">
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="w-full text-left p-4 rounded-xl hover:bg-slate-50 transition-colors border border-slate-200 bg-white"
+                        style={{ borderLeftWidth: '4px', borderLeftColor: themeColor }}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                {isExpanded ? <ChevronDown size={20} className="text-slate-500" /> : <ChevronRight size={20} className="text-slate-500" />}
+                                <div>
+                                    <h3 className="font-bold text-slate-900">{standard.id}. {standard.name}</h3>
+                                    <p className="text-sm text-slate-600 mt-1">{standard.description}</p>
+                                </div>
+                            </div>
+                            {standard.criteria.length > 0 && (
+                                <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                                    {standard.criteria.length} {standard.criteria.length === 1 ? 'criterium' : 'criteria'}
+                                </span>
+                            )}
+                        </div>
+                    </button>
+
+                    {isExpanded && standard.criteria.length > 0 && (
+                        <div className="mt-3 ml-4 space-y-3">
+                            {standard.criteria.map((criterion) => (
+                                <CriterionCard 
+                                    key={criterion.id} 
+                                    criterion={criterion}
+                                    onUpdateExplanation={onUpdateExplanation}
+                                    onUpdateStatus={onUpdateStatus}
+                                    onUpdateActionPoints={onUpdateActionPoints}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [data, setData] = useState(qualityData);
+            const [activeTheme, setActiveTheme] = useState(null);
+            const [activeView, setActiveView] = useState('themes');
+            const [actionPointsFilter, setActionPointsFilter] = useState(null);
+
+            const handleUpdateExplanation = (criterionId, newExplanation) => {
+                setData(prevData => ({
+                    ...prevData,
+                    themes: prevData.themes.map(theme => ({
+                        ...theme,
+                        standards: theme.standards.map(standard => ({
+                            ...standard,
+                            criteria: standard.criteria.map(criterion =>
+                                criterion.id === criterionId
+                                    ? { ...criterion, explanation: newExplanation }
+                                    : criterion
+                            )
+                        }))
+                    }))
+                }));
+            };
+
+            const handleUpdateStatus = (criterionId, year, newStatus) => {
+                setData(prevData => ({
+                    ...prevData,
+                    themes: prevData.themes.map(theme => ({
+                        ...theme,
+                        standards: theme.standards.map(standard => ({
+                            ...standard,
+                            criteria: standard.criteria.map(criterion =>
+                                criterion.id === criterionId
+                                    ? { 
+                                        ...criterion, 
+                                        years: { ...criterion.years, [year]: newStatus },
+                                        status: newStatus
+                                    }
+                                    : criterion
+                            )
+                        }))
+                    }))
+                }));
+            };
+
+            const handleUpdateActionPoints = (criterionId, newActionPoints) => {
+                setData(prevData => ({
+                    ...prevData,
+                    themes: prevData.themes.map(theme => ({
+                        ...theme,
+                        standards: theme.standards.map(standard => ({
+                            ...standard,
+                            criteria: standard.criteria.map(criterion =>
+                                criterion.id === criterionId
+                                    ? { ...criterion, actionPoints: newActionPoints }
+                                    : criterion
+                            )
+                        }))
+                    }))
+                }));
+            };
+
+            const activeThemeData = data.themes.find(t => t.id === activeTheme);
+
+            const exportToPDF = () => {
+                alert('PDF export functionaliteit - in een echte applicatie zou hier een PDF worden gegenereerd');
+            };
+
+            const exportToExcel = () => {
+                alert('Excel export functionaliteit - in een echte applicatie zou hier een CSV/Excel worden gegenereerd');
+            };
+
+            const handleViewActionPoints = (filter) => {
+                setActionPointsFilter(filter);
+                setActiveView('action-points');
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50">
+                    <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
+                        <div className="max-w-7xl mx-auto px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-6">
+                                    <img 
+                                        src="logo_techniekcollege.jpg"
+                                        alt="Techniek College Rotterdam" 
+                                        className="h-12 w-auto"
+                                        onError={(e) => {
+                                            // Fallback if image doesn't load
+                                            e.target.style.display = 'none';
+                                        }}
+                                    />
+                                    <div className="border-l border-slate-300 pl-6">
+                                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Kwaliteit in Beeld</h1>
+                                        <p className="text-sm text-slate-600">ICT & Programmeren • Schiedamseweg 245</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setActiveView('dashboard');
+                                            setActiveTheme(null);
+                                        }}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                                            activeView === 'dashboard' 
+                                                ? 'bg-blue-600 text-white' 
+                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                        }`}
+                                    >
+                                        <BarChart3 size={18} />
+                                        Dashboard
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setActiveView('themes');
+                                            setActiveTheme(null);
+                                        }}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                            activeView === 'themes' || activeView === 'theme-detail'
+                                                ? 'bg-blue-600 text-white' 
+                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                        }`}
+                                    >
+                                        Thema's
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveView('team')}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                            activeView === 'team'
+                                                ? 'bg-blue-600 text-white' 
+                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                        }`}
+                                    >
+                                        Team
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-6 py-8">
+                        {activeView === 'dashboard' && (
+                            <Dashboard 
+                                data={data} 
+                                onExportPDF={exportToPDF}
+                                onExportExcel={exportToExcel}
+                                onViewActionPoints={handleViewActionPoints}
+                            />
+                        )}
+
+                        {activeView === 'action-points' && (
+                            <ActionPointsOverview 
+                                data={data}
+                                filter={actionPointsFilter}
+                                onBack={() => setActiveView('dashboard')}
+                            />
+                        )}
+
+                        {activeView === 'team' && (
+                            <PersonenOverview 
+                                data={data}
+                                onBack={() => setActiveView('dashboard')}
+                            />
+                        )}
+
+                        {activeView === 'themes' && !activeTheme && (
+                            <div>
+                                <div className="mb-8">
+                                    <h2 className="text-2xl font-bold text-slate-900 mb-2">Selecteer een thema</h2>
+                                    <p className="text-slate-600">Klik op een thema om de bijbehorende standaarden en criteria te bekijken</p>
+                                </div>
+                                
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {data.themes.map((theme) => (
+                                        <button
+                                            key={theme.id}
+                                            onClick={() => {
+                                                setActiveTheme(theme.id);
+                                                setActiveView('theme-detail');
+                                            }}
+                                            className="group p-6 bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-200 text-left"
+                                            style={{ 
+                                                borderLeftWidth: '6px', 
+                                                borderLeftColor: theme.color 
+                                            }}
+                                        >
+                                            <div className="flex items-start justify-between mb-3">
+                                                <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                                                    {theme.id}
+                                                </h3>
+                                                <ChevronRight className="text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" size={24} />
+                                            </div>
+                                            <p className="text-slate-700 font-medium mb-2">{theme.name}</p>
+                                            <p className="text-sm text-slate-500">
+                                                {theme.standards.length} {theme.standards.length === 1 ? 'standaard' : 'standaarden'}
+                                            </p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {(activeView === 'theme-detail' || activeView === 'themes') && activeTheme && (
+                            <div>
+                                <button
+                                    onClick={() => {
+                                        setActiveTheme(null);
+                                        setActiveView('themes');
+                                    }}
+                                    className="mb-6 flex items-center gap-2 text-slate-600 hover:text-slate-900 font-medium transition-colors"
+                                >
+                                    <ChevronRight size={20} className="rotate-180" />
+                                    Terug naar thema's
+                                </button>
+
+                                <div 
+                                    className="mb-8 p-6 bg-white rounded-2xl border-2 shadow-sm"
+                                    style={{ 
+                                        borderLeftWidth: '6px', 
+                                        borderLeftColor: activeThemeData.color 
+                                    }}
+                                >
+                                    <h2 className="text-3xl font-bold text-slate-900 mb-1">
+                                        {activeThemeData.id}. {activeThemeData.name}
+                                    </h2>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {activeThemeData.standards.map((standard) => (
+                                        <StandardSection
+                                            key={standard.id}
+                                            standard={standard}
+                                            themeColor={activeThemeData.color}
+                                            onUpdateExplanation={handleUpdateExplanation}
+                                            onUpdateStatus={handleUpdateStatus}
+                                            onUpdateActionPoints={handleUpdateActionPoints}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
