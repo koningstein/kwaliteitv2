@@ -24,6 +24,18 @@
                     <flux:sidebar.item icon="map-pin" :href="route('admin.locations.index')" :current="request()->routeIs('admin.locations.*')" wire:navigate>
                         {{ __('Locaties') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="map-pin" :href="route('admin.themes.index')" :current="request()->routeIs('admin.themes.*')" wire:navigate>
+                        {{ __('Thema') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.standards.index')" :current="request()->routeIs('admin.standards.*')" wire:navigate>
+                        {{ __('Standaarden') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="check-badge" :href="route('admin.criteria.index')" :current="request()->routeIs('admin.criteria.*')" wire:navigate>
+                        {{ __('Criteria') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('admin.indicators.index')" :current="request()->routeIs('admin.indicators.*')" wire:navigate>
+                        {{ __('Indicatoren') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

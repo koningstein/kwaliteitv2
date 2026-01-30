@@ -12,9 +12,7 @@ class Standard extends Model
     /** @use HasFactory<\Database\Factories\StandardFactory> */
     use HasFactory;
 
-    protected $guarded = [
-        'id', 'theme_id', 'code', 'name', 'description', 'created_at', 'updated_at'
-    ];
+    protected $fillable = ['theme_id', 'code', 'name', 'description'];
 
     public function theme(): BelongsTo
     {

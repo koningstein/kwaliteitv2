@@ -11,7 +11,7 @@ class Indicator extends Model
     /** @use HasFactory<\Database\Factories\IndicatorFactory> */
     use HasFactory;
 
-    protected $guarded = ['id', 'criterion_id', 'text'];
+    protected $fillable = ['criterion_id', 'text', 'sort_order'];
 
     public function criterion(): BelongsTo
     {

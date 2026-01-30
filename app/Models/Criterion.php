@@ -14,9 +14,7 @@ class Criterion extends Model
 
     protected $table = 'criteria';
 
-    protected $guarded = [
-        'id', 'standard_id', 'number', 'text', 'explanation', 'created_at', 'updated_at',
-    ];
+    protected $fillable = ['standard_id', 'number', 'text', 'explanation'];
 
     public function standard(): BelongsTo
     {

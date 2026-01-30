@@ -5,63 +5,52 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\IndicatorStoreRequest;
 use App\Http\Requests\IndicatorUpdateRequest;
+use App\Models\Criterion;
 use App\Models\Indicator;
 
 class IndicatorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.indicators.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $criteria = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
+
+        return view('admin.indicators.create', compact('criteria'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(IndicatorStoreRequest $request)
     {
-        //
+        Indicator::create($request->validated());
+
+        return redirect()->route('admin.indicators.index')
+            ->with('success', 'Indicator succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Indicator $indicator)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Indicator $indicator)
     {
-        //
+        $indicator->load('criterion.standard.theme');
+        $criteria = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
+
+        return view('admin.indicators.edit', compact('indicator', 'criteria'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(IndicatorUpdateRequest $request, Indicator $indicator)
     {
-        //
+        $indicator->update($request->validated());
+
+        return redirect()->route('admin.indicators.index')
+            ->with('success', 'Indicator succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Indicator $indicator)
     {
-        //
+        $indicator->delete();
+
+        return redirect()->route('admin.indicators.index')
+            ->with('success', 'Indicator succesvol verwijderd.');
     }
 }

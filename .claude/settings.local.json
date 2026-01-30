@@ -10,7 +10,9 @@
       "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan migrate)",
       "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan route:list --path=admin)",
       "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan migrate:fresh --seed)",
-      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan tinker:*)"
+      "Bash(\"C:/Users/mkoni/.config/herd/bin/php.bat\" artisan tinker:*)",
+      "Bash(tree:*)",
+      "Bash(ls:*)"
     ]
   }
 }

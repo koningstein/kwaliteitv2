@@ -6,62 +6,51 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StandardStoreRequest;
 use App\Http\Requests\StandardUpdateRequest;
 use App\Models\Standard;
+use App\Models\Theme;
 
 class StandardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.standards.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $themes = Theme::orderBy('name')->get();
+
+        return view('admin.standards.create', compact('themes'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StandardStoreRequest $request)
     {
-        //
+        Standard::create($request->validated());
+
+        return redirect()->route('admin.standards.index')
+            ->with('success', 'Standaard succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Standard $standard)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Standard $standard)
     {
-        //
+        $standard->load('theme');
+        $themes = Theme::orderBy('name')->get();
+
+        return view('admin.standards.edit', compact('standard', 'themes'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(StandardUpdateRequest $request, Standard $standard)
     {
-        //
+        $standard->update($request->validated());
+
+        return redirect()->route('admin.standards.index')
+            ->with('success', 'Standaard succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Standard $standard)
     {
-        //
+        $standard->delete();
+
+        return redirect()->route('admin.standards.index')
+            ->with('success', 'Standaard succesvol verwijderd.');
     }
 }

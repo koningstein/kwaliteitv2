@@ -6,62 +6,51 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CriterionStoreRequest;
 use App\Http\Requests\CriterionUpdateRequest;
 use App\Models\Criterion;
+use App\Models\Standard;
 
 class CriterionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.criteria.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $standards = Standard::with('theme')->orderBy('code')->get();
+
+        return view('admin.criteria.create', compact('standards'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(CriterionStoreRequest $request)
     {
-        //
+        Criterion::create($request->validated());
+
+        return redirect()->route('admin.criteria.index')
+            ->with('success', 'Criterium succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Criterion $criterion)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Criterion $criterion)
     {
-        //
+        $criterion->load('standard.theme');
+        $standards = Standard::with('theme')->orderBy('code')->get();
+
+        return view('admin.criteria.edit', compact('criterion', 'standards'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(CriterionUpdateRequest $request, Criterion $criterion)
     {
-        //
+        $criterion->update($request->validated());
+
+        return redirect()->route('admin.criteria.index')
+            ->with('success', 'Criterium succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Criterion $criterion)
     {
-        //
+        $criterion->delete();
+
+        return redirect()->route('admin.criteria.index')
+            ->with('success', 'Criterium succesvol verwijderd.');
     }
 }

@@ -11,7 +11,14 @@ class Theme extends Model
     /** @use HasFactory<\Database\Factories\ThemeFactory> */
     use HasFactory;
 
-    protected $guarded = ['id', 'code', 'name', 'color', 'created_at', 'updated_at'];
+    protected $fillable = ['code', 'name', 'color', 'is_deletable'];
+
+    protected function casts(): array
+    {
+        return [
+            'is_deletable' => 'boolean',
+        ];
+    }
 
     public function standards(): HasMany
     {

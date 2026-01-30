@@ -9,59 +9,47 @@ use App\Models\Theme;
 
 class ThemeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.themes.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('admin.themes.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ThemeStoreRequest $request)
     {
-        //
+        Theme::create($request->validated());
+
+        return redirect()->route('admin.themes.index')
+            ->with('success', 'Thema succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Theme $theme)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Theme $theme)
     {
-        //
+        return view('admin.themes.edit', compact('theme'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(ThemeUpdateRequest $request, Theme $theme)
     {
-        //
+        $theme->update($request->validated());
+
+        return redirect()->route('admin.themes.index')
+            ->with('success', 'Thema succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Theme $theme)
     {
-        //
+        if (!$theme->is_deletable) {
+            return redirect()->route('admin.themes.index')
+                ->with('error', 'Dit thema kan niet verwijderd worden.');
+        }
+
+        $theme->delete();
+
+        return redirect()->route('admin.themes.index')
+            ->with('success', 'Thema succesvol verwijderd.');
     }
 }
