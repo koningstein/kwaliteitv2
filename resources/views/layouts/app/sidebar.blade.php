@@ -36,6 +36,12 @@
                     <flux:sidebar.item icon="list-bullet" :href="route('admin.indicators.index')" :current="request()->routeIs('admin.indicators.*')" wire:navigate>
                         {{ __('Indicatoren') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="list-bullet" :href="route('admin.action-point-statuses.index')" :current="request()->routeIs('admin.action-point-statuses.*')" wire:navigate>
+                        {{ __('Actiepunt statussen') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="calendar" :href="route('admin.reporting-periods.index')" :current="request()->routeIs('admin.reporting-periods.*')" wire:navigate>
+                        {{ __('Rapportage periodes') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

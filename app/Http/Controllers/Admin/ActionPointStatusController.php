@@ -9,59 +9,42 @@ use App\Models\ActionPointStatus;
 
 class ActionPointStatusController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.action-point-statuses.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('admin.action-point-statuses.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ActionPointStatusStoreRequest $request)
     {
-        //
+        ActionPointStatus::create($request->validated());
+
+        return redirect()->route('admin.action-point-statuses.index')
+            ->with('success', 'Status succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ActionPointStatus $actionPointStatus)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(ActionPointStatus $actionPointStatus)
     {
-        //
+        return view('admin.action-point-statuses.edit', compact('actionPointStatus'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(ActionPointStatusUpdateRequest $request, ActionPointStatus $actionPointStatus)
     {
-        //
+        $actionPointStatus->update($request->validated());
+
+        return redirect()->route('admin.action-point-statuses.index')
+            ->with('success', 'Status succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(ActionPointStatus $actionPointStatus)
     {
-        //
+        $actionPointStatus->delete();
+
+        return redirect()->route('admin.action-point-statuses.index')
+            ->with('success', 'Status succesvol verwijderd.');
     }
 }

@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActionPointStatusController;
 use App\Http\Controllers\Admin\CriterionController;
 use App\Http\Controllers\Admin\IndicatorController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\ReportingPeriodController;
 use App\Http\Controllers\Admin\StandardController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\ThemeController;
@@ -24,6 +26,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::resource('standards', StandardController::class)->except(['show']);
     Route::resource('criteria', CriterionController::class)->except(['show']);
     Route::resource('indicators', IndicatorController::class)->except(['show']);
+    Route::resource('action-point-statuses', ActionPointStatusController::class)->except(['show']);
+    Route::resource('reporting-periods', ReportingPeriodController::class)->except(['show']);
 });
 
 require __DIR__.'/settings.php';
