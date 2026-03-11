@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActionPointController;
 use App\Http\Controllers\Admin\ActionPointStatusController;
 use App\Http\Controllers\Admin\CriterionController;
+use App\Http\Controllers\Admin\CriterionScoreController;
+use App\Http\Controllers\Admin\EvaluationController;
 use App\Http\Controllers\Admin\IndicatorController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ReportingPeriodController;
@@ -28,6 +31,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::resource('indicators', IndicatorController::class)->except(['show']);
     Route::resource('action-point-statuses', ActionPointStatusController::class)->except(['show']);
     Route::resource('reporting-periods', ReportingPeriodController::class)->except(['show']);
+    Route::resource('action-points', ActionPointController::class)->except(['show']);
+    Route::resource('criterion-scores', CriterionScoreController::class)->except(['show']);
+    Route::resource('evaluations', EvaluationController::class)->except(['show']);
 });
 
 require __DIR__.'/settings.php';

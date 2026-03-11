@@ -5,63 +5,60 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CriterionScoreStoreRequest;
 use App\Http\Requests\CriterionScoreUpdateRequest;
+use App\Models\Criterion;
 use App\Models\CriterionScore;
+use App\Models\ReportingPeriod;
 
 class CriterionScoreController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.criterion-scores.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $criteria         = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
+        $reportingPeriods = ReportingPeriod::orderBy('sort_order')->orderBy('label')->get();
+
+        return view('admin.criterion-scores.create', compact('criteria', 'reportingPeriods'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(CriterionScoreStoreRequest $request)
     {
-        //
+        $data             = $request->validated();
+        $data['updated_by'] = auth()->user()?->id;
+
+        CriterionScore::create($data);
+
+        return redirect()->route('admin.criterion-scores.index')
+            ->with('success', 'Criteriumscore succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CriterionScore $criterionScore)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(CriterionScore $criterionScore)
     {
-        //
+        $criteria         = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
+        $reportingPeriods = ReportingPeriod::orderBy('sort_order')->orderBy('label')->get();
+
+        return view('admin.criterion-scores.edit', compact('criterionScore', 'criteria', 'reportingPeriods'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(CriterionScoreUpdateRequest $request, CriterionScore $criterionScore)
     {
-        //
+        $data             = $request->validated();
+        $data['updated_by'] = auth()->user()?->id;
+
+        $criterionScore->update($data);
+
+        return redirect()->route('admin.criterion-scores.index')
+            ->with('success', 'Criteriumscore succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(CriterionScore $criterionScore)
     {
-        //
+        $criterionScore->delete();
+
+        return redirect()->route('admin.criterion-scores.index')
+            ->with('success', 'Criteriumscore succesvol verwijderd.');
     }
 }

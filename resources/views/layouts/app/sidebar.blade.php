@@ -42,6 +42,15 @@
                     <flux:sidebar.item icon="calendar" :href="route('admin.reporting-periods.index')" :current="request()->routeIs('admin.reporting-periods.*')" wire:navigate>
                         {{ __('Rapportage periodes') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="exclamation-triangle" :href="route('admin.action-points.index')" :current="request()->routeIs('admin.action-points.*')" wire:navigate>
+                        {{ __('Actiepunten') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="chart-bar" :href="route('admin.criterion-scores.index')" :current="request()->routeIs('admin.criterion-scores.*')" wire:navigate>
+                        {{ __('Criteriumscores') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-check" :href="route('admin.evaluations.index')" :current="request()->routeIs('admin.evaluations.*')" wire:navigate>
+                        {{ __('Evaluaties') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

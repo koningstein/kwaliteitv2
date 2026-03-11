@@ -5,63 +5,57 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EvaluationStoreRequest;
 use App\Http\Requests\EvaluationUpdateRequest;
+use App\Models\ActionPoint;
 use App\Models\Evaluation;
 
 class EvaluationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.evaluations.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $actionPoints = ActionPoint::with(['criterion.standard', 'team'])
+            ->orderBy('team_id')
+            ->orderBy('criterion_id')
+            ->get();
+
+        return view('admin.evaluations.create', compact('actionPoints'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(EvaluationStoreRequest $request)
     {
-        //
+        Evaluation::create($request->validated());
+
+        return redirect()->route('admin.evaluations.index')
+            ->with('success', 'Evaluatie succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Evaluation $evaluation)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Evaluation $evaluation)
     {
-        //
+        $actionPoints = ActionPoint::with(['criterion.standard', 'team'])
+            ->orderBy('team_id')
+            ->orderBy('criterion_id')
+            ->get();
+
+        return view('admin.evaluations.edit', compact('evaluation', 'actionPoints'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(EvaluationUpdateRequest $request, Evaluation $evaluation)
     {
-        //
+        $evaluation->update($request->validated());
+
+        return redirect()->route('admin.evaluations.index')
+            ->with('success', 'Evaluatie succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Evaluation $evaluation)
     {
-        //
+        $evaluation->delete();
+
+        return redirect()->route('admin.evaluations.index')
+            ->with('success', 'Evaluatie succesvol verwijderd.');
     }
 }

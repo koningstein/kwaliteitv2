@@ -6,62 +6,59 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ActionPointStoreRequest;
 use App\Http\Requests\ActionPointUpdateRequest;
 use App\Models\ActionPoint;
+use App\Models\ActionPointStatus;
+use App\Models\Criterion;
+use App\Models\Team;
+use App\Models\User;
 
 class ActionPointController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return view('admin.action-points.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $criteria = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
+        $teams    = Team::orderBy('name')->get();
+        $users    = User::orderBy('name')->get();
+        $statuses = ActionPointStatus::orderBy('name')->get();
+
+        return view('admin.action-points.create', compact('criteria', 'teams', 'users', 'statuses'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ActionPointStoreRequest $request)
     {
-        //
+        ActionPoint::create($request->validated());
+
+        return redirect()->route('admin.action-points.index')
+            ->with('success', 'Actiepunt succesvol aangemaakt.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ActionPoint $actionPoint)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(ActionPoint $actionPoint)
     {
-        //
+        $criteria = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
+        $teams    = Team::orderBy('name')->get();
+        $users    = User::orderBy('name')->get();
+        $statuses = ActionPointStatus::orderBy('name')->get();
+
+        return view('admin.action-points.edit', compact('actionPoint', 'criteria', 'teams', 'users', 'statuses'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(ActionPointUpdateRequest $request, ActionPoint $actionPoint)
     {
-        //
+        $actionPoint->update($request->validated());
+
+        return redirect()->route('admin.action-points.index')
+            ->with('success', 'Actiepunt succesvol bijgewerkt.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(ActionPoint $actionPoint)
     {
-        //
+        $actionPoint->delete();
+
+        return redirect()->route('admin.action-points.index')
+            ->with('success', 'Actiepunt succesvol verwijderd.');
     }
 }
