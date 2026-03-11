@@ -21,14 +21,14 @@ class ReportingPeriodSeeder extends Seeder
         \App\Models\ReportingPeriod::create([
             'slug' => '2026',
             'label' => '2026',
-            'is_active' => false,
+            'is_active' => true,
             'sort_order' => 2,
         ]);
 
         \App\Models\ReportingPeriod::create([
             'slug' => '2027',
             'label' => '2027',
-            'is_active' => false,
+            'is_active' => true,
             'sort_order' => 3,
         ]);
     }

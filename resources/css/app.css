@@ -67,6 +67,9 @@
     }
 }
 
+/* Verberg Alpine-elementen totdat Alpine geladen is */
+[x-cloak] { display: none !important; }
+
 @layer base {
 
     *,

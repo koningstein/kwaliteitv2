@@ -11,7 +11,7 @@ class Evaluation extends Model
     /** @use HasFactory<\Database\Factories\EvaluationFactory> */
     use HasFactory;
 
-    protected $guarded = ['id', 'action_point_id', 'description', 'created_at'];
+    protected $guarded = ['id'];
 
     public function actionPoint(): BelongsTo
     {

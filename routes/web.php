@@ -11,6 +11,10 @@ use App\Http\Controllers\Admin\ReportingPeriodController;
 use App\Http\Controllers\Admin\StandardController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\ThemeController;
+use App\Http\Controllers\Teacher\ActionPointController as TeacherActionPointController;
+use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\Teacher\TeamController as TeacherTeamController;
+use App\Http\Controllers\Teacher\ThemeController as TeacherThemeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,3 +41,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 });
 
 require __DIR__.'/settings.php';
+
+Route::prefix('teacher')->name('teacher.')->group(function () {
+    Route::get('/', [TeacherDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/themes', [TeacherThemeController::class, 'index'])->name('themes.index');
+    Route::get('/themes/{theme}', [TeacherThemeController::class, 'show'])->name('themes.show');
+    Route::get('/team', [TeacherTeamController::class, 'index'])->name('team.index');
+    Route::get('/action-points', [TeacherActionPointController::class, 'index'])->name('action-points.index');
+});

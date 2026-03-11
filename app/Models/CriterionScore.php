@@ -11,9 +11,7 @@ class CriterionScore extends Model
     /** @use HasFactory<\Database\Factories\CriterionScoreFactory> */
     use HasFactory;
 
-    protected $guarded = [
-        'id', 'criterion_id', 'reporting_period_id', 'status', 'updated_by', 'updated_at',
-    ];
+    protected $guarded = ['id'];
 
     public function criterion(): BelongsTo
     {

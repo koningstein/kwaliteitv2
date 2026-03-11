@@ -12,10 +12,7 @@ class ActionPoint extends Model
     /** @use HasFactory<\Database\Factories\ActionPointFactory> */
     use HasFactory;
 
-    protected $guarded = [
-        'id', 'criterion_id', 'user_id', 'team_id', 'action_point_status_id',
-        'description', 'start_date', 'end_date', 'created_at', 'updated_at',
-    ];
+    protected $guarded = ['id'];
 
     public function criterion(): BelongsTo
     {
