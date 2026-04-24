@@ -22,15 +22,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2. Kwaliteitsstructuur (Thema -> Standaard -> Criterium)
-        // Dit MOET voor de ActionPoints gebeuren
         $this->call([
             ThemeSeeder::class,
             StandardSeeder::class,
         ]);
 
-        // 3. Locaties, Teams en Gebruikers
+        // 3. Locaties, Rollen & Permissies, Teams en Gebruikers
         $this->call(LocationSeeder::class);
-        $this->call(TeamSeeder::class);
+        $this->call(RolePermissionSeeder::class);
+        // $this->call(TeamSeeder::class); // Uitgeschakeld: UserSeeder maakt specifieke teams aan
+        $this->call(UserSeeder::class);
 
         // 4. Scores (nu er Criteria en Users zijn)
         $this->call(CriterionSeeder::class);
