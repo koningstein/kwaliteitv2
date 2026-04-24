@@ -12,11 +12,16 @@ class Standard extends Model
     /** @use HasFactory<\Database\Factories\StandardFactory> */
     use HasFactory;
 
-    protected $fillable = ['theme_id', 'code', 'name', 'description'];
+    protected $fillable = ['theme_id', 'reporting_period_id', 'code', 'name', 'description'];
 
     public function theme(): BelongsTo
     {
         return $this->belongsTo(Theme::class);
+    }
+
+    public function reportingPeriod(): BelongsTo
+    {
+        return $this->belongsTo(ReportingPeriod::class);
     }
 
     public function criteria(): HasMany

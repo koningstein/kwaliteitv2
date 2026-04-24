@@ -7,9 +7,18 @@ use App\Http\Requests\StandardStoreRequest;
 use App\Http\Requests\StandardUpdateRequest;
 use App\Models\Standard;
 use App\Models\Theme;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class StandardController extends Controller
+class StandardController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage-standards', except: ['index']),
+        ];
+    }
+
     public function index()
     {
         return view('admin.standards.index');

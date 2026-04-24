@@ -10,9 +10,17 @@ use App\Models\ActionPointStatus;
 use App\Models\Criterion;
 use App\Models\Team;
 use App\Models\User;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class ActionPointController extends Controller
+class ActionPointController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:edit-action-points', except: ['index']),
+        ];
+    }
     public function index()
     {
         return view('admin.action-points.index');

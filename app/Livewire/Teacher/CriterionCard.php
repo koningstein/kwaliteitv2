@@ -10,16 +10,15 @@ class CriterionCard extends Component
 {
     public int $criterionId;
     public $periods = [];
-
-    // Scores indexed by reporting_period_id => status
     public array $scores = [];
-
-    // Open/dicht state
     public bool $isOpen = false;
-
-    // Toelichting (explanation)
     public string $explanation = '';
     public bool $editingExplanation = false;
+
+    private function userTeamId(): ?int
+    {
+        return auth()->user()?->teams->first()?->id;
+    }
 
     public function mount(Criterion $criterion, $periods): void
     {
@@ -27,8 +26,15 @@ class CriterionCard extends Component
         $this->periods     = $periods;
         $this->explanation = $criterion->explanation ?? '';
 
-        // Scores initialiseren vanuit de al eager-loaded relatie
-        foreach ($criterion->scores as $score) {
+        $teamId = $this->userTeamId();
+
+        // Laad scores gefilterd op het eigen team
+        $teamScores = $criterion->scores->when(
+            $teamId,
+            fn ($col) => $col->where('team_id', $teamId)
+        );
+
+        foreach ($teamScores as $score) {
             $this->scores[$score->reporting_period_id] = $score->status;
         }
     }
@@ -40,10 +46,13 @@ class CriterionCard extends Component
 
     public function setScore(int $periodId, string $status): void
     {
+        $teamId = $this->userTeamId();
+
         CriterionScore::updateOrCreate(
             [
                 'criterion_id'        => $this->criterionId,
                 'reporting_period_id' => $periodId,
+                'team_id'             => $teamId,
             ],
             [
                 'status'     => $status,
@@ -68,15 +77,19 @@ class CriterionCard extends Component
 
     public function render()
     {
+        $teamId = $this->userTeamId();
+
         $criterion = Criterion::with([
             'indicators' => fn ($q) => $q->orderBy('sort_order'),
+            // Actiepunten gefilterd op eigen team
+            'actionPoints' => fn ($q) => $teamId
+                ? $q->where('team_id', $teamId)
+                : $q,
             'actionPoints.status',
             'actionPoints.user',
             'actionPoints.evaluations',
         ])->findOrFail($this->criterionId);
 
-        return view('livewire.teacher.criterion-card', [
-            'criterion' => $criterion,
-        ]);
+        return view('livewire.teacher.criterion-card', ['criterion' => $criterion]);
     }
 }

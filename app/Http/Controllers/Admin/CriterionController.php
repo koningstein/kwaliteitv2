@@ -7,9 +7,18 @@ use App\Http\Requests\CriterionStoreRequest;
 use App\Http\Requests\CriterionUpdateRequest;
 use App\Models\Criterion;
 use App\Models\Standard;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class CriterionController extends Controller
+class CriterionController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage-criteria', except: ['index']),
+        ];
+    }
+
     public function index()
     {
         return view('admin.criteria.index');

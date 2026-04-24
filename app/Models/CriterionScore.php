@@ -23,6 +23,11 @@ class CriterionScore extends Model
         return $this->belongsTo(ReportingPeriod::class);
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');

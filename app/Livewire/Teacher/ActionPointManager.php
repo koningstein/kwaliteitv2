@@ -13,14 +13,12 @@ class ActionPointManager extends Component
 {
     public int $criterionId;
 
-    // Form: nieuw actiepunt
     public bool $showAddForm = false;
     public string $newDescription = '';
     public ?int $newUserId = null;
     public string $newStartDate = '';
     public string $newEndDate = '';
 
-    // Bewerken
     public ?int $editingId = null;
     public string $editDescription = '';
     public ?int $editUserId = null;
@@ -29,19 +27,34 @@ class ActionPointManager extends Component
     public ?int $editStatusId = null;
     public string $editEvaluationText = '';
 
-    // Evaluatie toevoegen
     public ?int $evaluatingId = null;
     public string $newEvaluationText = '';
     public array $expandedEvaluations = [];
+
+    private function userTeamId(): ?int
+    {
+        return auth()->user()?->teams->first()?->id;
+    }
+
+    private function teamUsers()
+    {
+        $teamId = $this->userTeamId();
+
+        if (!$teamId) {
+            return User::orderBy('name')->get();
+        }
+
+        return User::whereHas('teams', fn ($q) => $q->where('teams.id', $teamId))
+            ->orderBy('name')
+            ->get();
+    }
 
     public function mount(Criterion $criterion): void
     {
         $this->criterionId = $criterion->id;
     }
 
-    // ----------------------------------------------------------------
-    // Nieuw actiepunt
-    // ----------------------------------------------------------------
+    // ── Nieuw actiepunt ─────────────────────────────────────────────
 
     public function addActionPoint(): void
     {
@@ -63,7 +76,7 @@ class ActionPointManager extends Component
         ActionPoint::create([
             'criterion_id'           => $this->criterionId,
             'user_id'                => $this->newUserId,
-            'team_id'                => null,
+            'team_id'                => $this->userTeamId(),
             'action_point_status_id' => $defaultStatus?->id,
             'description'            => $this->newDescription,
             'start_date'             => $this->newStartDate,
@@ -73,9 +86,7 @@ class ActionPointManager extends Component
         $this->reset(['newDescription', 'newUserId', 'newStartDate', 'newEndDate', 'showAddForm']);
     }
 
-    // ----------------------------------------------------------------
-    // Bewerken
-    // ----------------------------------------------------------------
+    // ── Bewerken ────────────────────────────────────────────────────
 
     public function startEdit(int $id): void
     {
@@ -99,12 +110,12 @@ class ActionPointManager extends Component
             'editStatusId'       => 'required|exists:action_point_statuses,id',
             'editEvaluationText' => 'nullable|string|max:2000',
         ], [
-            'editDescription.required'  => 'Beschrijving is verplicht.',
-            'editUserId.required'       => 'Kies een verantwoordelijke.',
-            'editStartDate.required'    => 'Startdatum is verplicht.',
-            'editEndDate.required'      => 'Einddatum is verplicht.',
-            'editEndDate.after_or_equal'=> 'Einddatum moet op of na de startdatum liggen.',
-            'editStatusId.required'     => 'Status is verplicht.',
+            'editDescription.required'   => 'Beschrijving is verplicht.',
+            'editUserId.required'        => 'Kies een verantwoordelijke.',
+            'editStartDate.required'     => 'Startdatum is verplicht.',
+            'editEndDate.required'       => 'Einddatum is verplicht.',
+            'editEndDate.after_or_equal' => 'Einddatum moet op of na de startdatum liggen.',
+            'editStatusId.required'      => 'Status is verplicht.',
         ]);
 
         ActionPoint::where('id', $this->editingId)->update([
@@ -130,18 +141,14 @@ class ActionPointManager extends Component
         $this->reset(['editingId', 'editDescription', 'editUserId', 'editStartDate', 'editEndDate', 'editStatusId', 'editEvaluationText']);
     }
 
-    // ----------------------------------------------------------------
-    // Verwijderen
-    // ----------------------------------------------------------------
+    // ── Verwijderen ─────────────────────────────────────────────────
 
     public function deleteActionPoint(int $id): void
     {
         ActionPoint::findOrFail($id)->delete();
     }
 
-    // ----------------------------------------------------------------
-    // Evaluaties
-    // ----------------------------------------------------------------
+    // ── Evaluaties ──────────────────────────────────────────────────
 
     public function toggleEvaluations(int $id): void
     {
@@ -179,15 +186,23 @@ class ActionPointManager extends Component
         $this->reset(['evaluatingId', 'newEvaluationText']);
     }
 
+    // ── Render ──────────────────────────────────────────────────────
+
     public function render()
     {
+        $teamId = $this->userTeamId();
+
         $criterion = Criterion::with([
+            // Actiepunten gefilterd op eigen team
+            'actionPoints' => fn ($q) => $teamId
+                ? $q->where('team_id', $teamId)
+                : $q,
             'actionPoints.status',
             'actionPoints.user',
             'actionPoints.evaluations',
         ])->findOrFail($this->criterionId);
 
-        $users    = User::orderBy('name')->get();
+        $users    = $this->teamUsers();
         $statuses = ActionPointStatus::all();
 
         return view('livewire.teacher.action-point-manager', [

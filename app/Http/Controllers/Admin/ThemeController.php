@@ -6,9 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ThemeStoreRequest;
 use App\Http\Requests\ThemeUpdateRequest;
 use App\Models\Theme;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class ThemeController extends Controller
+class ThemeController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage-themes', except: ['index']),
+        ];
+    }
+
     public function index()
     {
         return view('admin.themes.index');

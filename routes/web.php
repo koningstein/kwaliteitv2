@@ -22,10 +22,10 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'role:ok_medewerker'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:ok_medewerker'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('teams', TeamController::class);
     Route::get('teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
     Route::resource('locations', LocationController::class)->except(['show']);
@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
 require __DIR__.'/settings.php';
 
-Route::prefix('teacher')->name('teacher.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:ok_medewerker|kwaliteitszorg|onderwijsleider|medewerker|directie'])->prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/', [TeacherDashboardController::class, 'index'])->name('dashboard');
     Route::get('/themes', [TeacherThemeController::class, 'index'])->name('themes.index');
     Route::get('/themes/{theme}', [TeacherThemeController::class, 'show'])->name('themes.show');

@@ -33,4 +33,9 @@ class Team extends Model
     {
         return $this->hasMany(ActionPoint::class);
     }
+
+    public function criterionScores(): HasMany
+    {
+        return $this->hasMany(CriterionScore::class);
+    }
 }

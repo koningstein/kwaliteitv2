@@ -14,25 +14,11 @@ class Criterion extends Model
 
     protected $table = 'criteria';
 
-    protected $fillable = ['standard_id', 'number', 'text', 'explanation'];
+    protected $fillable = ['standard_id', 'reporting_period_id', 'number', 'text', 'explanation'];
 
-    public function standard(): BelongsTo
-    {
-        return $this->belongsTo(Standard::class);
-    }
-
-    public function indicators(): HasMany
-    {
-        return $this->hasMany(Indicator::class);
-    }
-
-    public function scores(): HasMany
-    {
-        return $this->hasMany(CriterionScore::class);
-    }
-
-    public function actionPoints(): HasMany
-    {
-        return $this->hasMany(ActionPoint::class);
-    }
+    public function standard(): BelongsTo { return $this->belongsTo(Standard::class); }
+    public function reportingPeriod(): BelongsTo { return $this->belongsTo(ReportingPeriod::class); }
+    public function indicators(): HasMany { return $this->hasMany(Indicator::class); }
+    public function scores(): HasMany { return $this->hasMany(CriterionScore::class); }
+    public function actionPoints(): HasMany { return $this->hasMany(ActionPoint::class); }
 }

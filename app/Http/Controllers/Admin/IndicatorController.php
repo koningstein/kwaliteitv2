@@ -7,9 +7,18 @@ use App\Http\Requests\IndicatorStoreRequest;
 use App\Http\Requests\IndicatorUpdateRequest;
 use App\Models\Criterion;
 use App\Models\Indicator;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class IndicatorController extends Controller
+class IndicatorController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage-indicators', except: ['index']),
+        ];
+    }
+
     public function index()
     {
         return view('admin.indicators.index');

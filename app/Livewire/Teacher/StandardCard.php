@@ -16,27 +16,18 @@ class StandardCard extends Component
     public int $standardId;
     public $periods;
 
-    // Standaard open/dicht
     public bool $isOpen = false;
-
-    // Welke criteria zijn open: [criterionId => bool]
     public array $openCriteria = [];
-
-    // Scores per criterium: [criterionId => [periodId => status]]
     public array $scores = [];
-
-    // Toelichting per criterium
     public array $explanations = [];
     public array $editingExplanation = [];
 
-    // Actiepunten: nieuw
     public ?int $showAddFormFor = null;
     public string $newDescription = '';
     public ?int $newUserId = null;
     public string $newStartDate = '';
     public string $newEndDate = '';
 
-    // Actiepunten: bewerken
     public ?int $editingActionPointId = null;
     public string $editDescription = '';
     public ?int $editUserId = null;
@@ -45,51 +36,97 @@ class StandardCard extends Component
     public ?int $editStatusId = null;
     public string $editEvaluationText = '';
 
-    // Evaluaties
     public ?int $evaluatingId = null;
     public string $newEvaluationText = '';
+
+    // ── Hulpfuncties voor team-scope ─────────────────────────────────
+
+    /**
+     * Geeft het eerste team van de ingelogde gebruiker terug.
+     * Kwaliteitszorg heeft altijd precies 1 team.
+     */
+    private function userTeamId(): ?int
+    {
+        return auth()->user()?->teams->first()?->id;
+    }
+
+    /**
+     * Geeft de users terug die tot het eigen team behoren (voor de dropdowns).
+     */
+    private function teamUsers()
+    {
+        $teamId = $this->userTeamId();
+
+        if (!$teamId) {
+            return User::orderBy('name')->get();
+        }
+
+        return User::whereHas('teams', fn ($q) => $q->where('teams.id', $teamId))
+            ->orderBy('name')
+            ->get();
+    }
+
+    // ── Mount ────────────────────────────────────────────────────────
 
     public function mount(Standard $standard, $periods): void
     {
         $this->standardId = $standard->id;
         $this->periods    = $periods;
 
-        // Initialiseer scores en toelichtingen vanuit de al geladen relaties
+        $teamId = $this->userTeamId();
+
         foreach ($standard->criteria as $criterion) {
             $this->explanations[$criterion->id] = $criterion->explanation ?? '';
             $this->scores[$criterion->id] = [];
-            foreach ($criterion->scores as $score) {
+
+            // Laad scores gefilterd op het eigen team
+            $teamScores = $criterion->scores->when(
+                $teamId,
+                fn ($col) => $col->where('team_id', $teamId)
+            );
+
+            foreach ($teamScores as $score) {
                 $this->scores[$criterion->id][$score->reporting_period_id] = $score->status;
             }
         }
     }
 
-    // ── Standaard toggle ──────────────────────────────────────────────
+    // ── Standaard toggle ─────────────────────────────────────────────
 
     public function toggleStandard(): void
     {
         $this->isOpen = !$this->isOpen;
     }
 
-    // ── Criterium toggle ──────────────────────────────────────────────
+    // ── Criterium toggle ─────────────────────────────────────────────
 
     public function toggleCriterion(int $criterionId): void
     {
         $this->openCriteria[$criterionId] = !($this->openCriteria[$criterionId] ?? false);
     }
 
-    // ── Scores ───────────────────────────────────────────────────────
+    // ── Scores ──────────────────────────────────────────────────────
 
     public function setScore(int $criterionId, int $periodId, string $status): void
     {
+        $teamId = $this->userTeamId();
+
         CriterionScore::updateOrCreate(
-            ['criterion_id' => $criterionId, 'reporting_period_id' => $periodId],
-            ['status' => $status, 'updated_by' => optional(auth()->user())->id]
+            [
+                'criterion_id'        => $criterionId,
+                'reporting_period_id' => $periodId,
+                'team_id'             => $teamId,
+            ],
+            [
+                'status'     => $status,
+                'updated_by' => optional(auth()->user())->id,
+            ]
         );
+
         $this->scores[$criterionId][$periodId] = $status;
     }
 
-    // ── Toelichting ──────────────────────────────────────────────────
+    // ── Toelichting ─────────────────────────────────────────────────
 
     public function startEditExplanation(int $criterionId): void
     {
@@ -108,7 +145,7 @@ class StandardCard extends Component
         $this->editingExplanation[$criterionId] = false;
     }
 
-    // ── Actiepunten: nieuw ────────────────────────────────────────────
+    // ── Actiepunten: nieuw ───────────────────────────────────────────
 
     public function showAddForm(int $criterionId): void
     {
@@ -142,7 +179,7 @@ class StandardCard extends Component
         ActionPoint::create([
             'criterion_id'           => $this->showAddFormFor,
             'user_id'                => $this->newUserId,
-            'team_id'                => null,
+            'team_id'                => $this->userTeamId(),
             'action_point_status_id' => $defaultStatus?->id,
             'description'            => $this->newDescription,
             'start_date'             => $this->newStartDate,
@@ -153,7 +190,7 @@ class StandardCard extends Component
         $this->reset(['newDescription', 'newUserId', 'newStartDate', 'newEndDate']);
     }
 
-    // ── Actiepunten: bewerken ─────────────────────────────────────────
+    // ── Actiepunten: bewerken ────────────────────────────────────────
 
     public function startEditActionPoint(int $id): void
     {
@@ -213,7 +250,7 @@ class StandardCard extends Component
         ActionPoint::findOrFail($id)->delete();
     }
 
-    // ── Evaluaties ────────────────────────────────────────────────────
+    // ── Evaluaties ───────────────────────────────────────────────────
 
     public function startEvaluation(int $id): void
     {
@@ -242,21 +279,30 @@ class StandardCard extends Component
         $this->reset(['evaluatingId', 'newEvaluationText']);
     }
 
-    // ── Render ────────────────────────────────────────────────────────
+    // ── Render ───────────────────────────────────────────────────────
 
     public function render()
     {
+        $teamId = $this->userTeamId();
+
         $standard = Standard::with([
             'theme',
-            'criteria'             => fn ($q) => $q->orderBy('number'),
-            'criteria.indicators'  => fn ($q) => $q->orderBy('sort_order'),
-            'criteria.scores',
+            'criteria'            => fn ($q) => $q->orderBy('number'),
+            'criteria.indicators' => fn ($q) => $q->orderBy('sort_order'),
+            // Scores gefilterd op eigen team
+            'criteria.scores'     => fn ($q) => $teamId
+                ? $q->where('team_id', $teamId)
+                : $q,
+            // Actiepunten gefilterd op eigen team
+            'criteria.actionPoints' => fn ($q) => $teamId
+                ? $q->where('team_id', $teamId)
+                : $q,
             'criteria.actionPoints.status',
             'criteria.actionPoints.user',
             'criteria.actionPoints.evaluations',
         ])->findOrFail($this->standardId);
 
-        $users    = User::orderBy('name')->get();
+        $users    = $this->teamUsers();
         $statuses = ActionPointStatus::all();
 
         return view('livewire.teacher.standard-card', [

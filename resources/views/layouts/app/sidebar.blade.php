@@ -12,14 +12,17 @@
 
             <flux:sidebar.nav>
                 <flux:sidebar.group :heading="__('Platform')" class="grid">
+                    @role('ok_medewerker')
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    @endrole
                     <flux:sidebar.item icon="academic-cap" :href="route('teacher.dashboard')" :current="request()->routeIs('teacher.*')" wire:navigate>
                         {{ __('Kwaliteit in Beeld') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
+                @role('ok_medewerker')
                 <flux:sidebar.group :heading="__('Beheer')" class="grid">
                     <flux:sidebar.item icon="users" :href="route('admin.teams.index')" :current="request()->routeIs('admin.teams.*')" wire:navigate>
                         {{ __('Teams') }}
@@ -55,6 +58,7 @@
                         {{ __('Evaluaties') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+                @endrole
             </flux:sidebar.nav>
 
             <flux:spacer />
