@@ -1,0 +1,117 @@
+name: kwaliteitv2
+
+services:
+
+  app:
+    container_name: kwv2-webserver
+    build: .
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+      if [ ! -f .env ]; then
+        echo '🚀 Nieuw project gevonden. Setup starten...';
+
+        echo '📦 Composer packages installeren...';
+        composer install ;
+
+        echo '📄 .env bestand aanmaken en configureren...';
+        cp .env.example .env ;
+
+        echo '🔌 Database connectie instellen...';
+        sed -i 's/^DB_CONNECTION=sqlite/DB_CONNECTION=mysql/' .env ;
+        sed -i 's/^# DB_HOST=127.0.0.1/DB_HOST=db/' .env ;
+        sed -i 's/^# DB_PORT=3306/DB_PORT=3306/' .env ;
+        sed -i 's/^# DB_DATABASE=laravel/DB_DATABASE=kwaliteitv2/' .env ;
+        sed -i 's/^# DB_USERNAME=root/DB_USERNAME=kwv2user/' .env ;
+        sed -i 's/^# DB_PASSWORD=/DB_PASSWORD=kwv2pass/' .env ;
+
+        echo '🔑 Applicatie key genereren...';
+        php artisan key:generate ;
+
+        echo '🎨 Frontend dependencies bouwen...';
+        npm install && npm run build ;
+
+        echo '⏳ Wachten tot MySQL wakker is voor de migraties...';
+        while ! php artisan migrate --force; do
+          echo '😴 Database slaapt nog... 3 seconden wachten...';
+          sleep 3;
+        done;
+
+        echo '🌱 Database seeders uitvoeren...';
+        php artisan db:seed --force ;
+
+        echo '🔓 Bestandsrechten teruggeven...';
+        chown -R 1000:1000 /var/www/html/storage /var/www/html/bootstrap/cache ;
+
+        echo '✅ Setup 100% voltooid!';
+      else
+        echo '✅ Project was al geconfigureerd. Server wordt gestart...';
+      fi;
+      php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  queue:
+    container_name: kwv2-queue
+    build: .
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+    command: >
+      bash -c "
+      echo '⏳ Wachten tot setup klaar is...';
+      until [ -f .env ]; do sleep 2; done;
+      while ! php artisan db:show > /dev/null 2>&1; do
+        echo '😴 DB nog niet bereikbaar...';
+        sleep 3;
+      done;
+      echo '✅ Queue worker gestart.';
+      while true; do
+        php artisan queue:work --tries=3 --max-jobs=100 --max-time=3600 --sleep=3;
+        echo '🔄 Queue worker gestopt, wordt over 2 seconden herstart...';
+        sleep 2;
+      done
+      "
+
+  db:
+    container_name: kwv2-db
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: kwv2rootpass
+      MYSQL_DATABASE: kwaliteitv2
+      MYSQL_USER: kwv2user
+      MYSQL_PASSWORD: kwv2pass
+    volumes:
+      - kwv2-db-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ukwv2user", "-pkwv2pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  phpmyadmin:
+    container_name: kwv2-phpmyadmin
+    image: phpmyadmin:latest
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  kwv2-db-data:
