@@ -26,7 +26,7 @@
                     </div>
                     <div>
                         <div class="text-sm font-bold text-slate-900 leading-tight">Kwaliteit in Beeld</div>
-                        <div class="text-xs text-slate-500 leading-tight">ICT &amp; Programmeren &bull; Schiedamseweg 245</div>
+                        <div class="text-xs text-slate-500 leading-tight">Techniek College Rotterdam</div>
                     </div>
                 </a>
 
@@ -63,7 +63,7 @@
                     Kwaliteit in Beeld
                 </h1>
                 <p class="text-xl text-slate-500 leading-relaxed mb-10">
-                    Het platform voor kwaliteitszorg binnen ICT &amp; Programmeren. Volg de voortgang van criteria, beheer actiepunten en houd de kwaliteit van onderwijs inzichtelijk.
+                    Het platform voor kwaliteitszorg binnen Techniek College Rotterdam. Volg de voortgang van criteria, beheer actiepunten en houd de kwaliteit van onderwijs inzichtelijk.
                 </p>
                 <div class="flex flex-wrap items-center gap-4">
                     @auth
@@ -228,7 +228,7 @@
                     </div>
                     <span class="text-sm font-semibold text-slate-700">Kwaliteit in Beeld</span>
                 </div>
-                <p class="text-xs text-slate-400">ICT &amp; Programmeren &bull; Schiedamseweg 245</p>
+                <p class="text-xs text-slate-400">Techniek College Rotterdam</p>
             </div>
         </div>
     </footer>
