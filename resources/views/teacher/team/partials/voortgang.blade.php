@@ -40,7 +40,8 @@
                     && $ap->status?->name !== 'Afgerond'
                 )->isNotEmpty();
             @endphp
-            <div class="bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all {{ $hasOverdue ? 'border-red-200' : 'border-slate-200 hover:border-slate-300' }}">
+            <a href="{{ route('teacher.action-points.index', ['user' => $u->id]) }}"
+               class="block bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all {{ $hasOverdue ? 'border-red-200' : 'border-slate-200 hover:border-slate-300' }}">
                 {{-- Avatar + naam --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
@@ -89,12 +90,11 @@
 
                 {{-- Link naar actiepunten --}}
                 <div class="mt-4 pt-3 border-t border-slate-100">
-                    <a href="{{ route('teacher.action-points.index') }}"
-                       class="text-xs text-slate-500 hover:text-slate-800 font-medium">
-                        Alle actiepunten bekijken →
-                    </a>
+                    <span class="text-xs text-blue-600 font-medium">
+                        Actiepunten bekijken →
+                    </span>
                 </div>
-            </div>
+                </a>
         @endforeach
     </div>
 @endif

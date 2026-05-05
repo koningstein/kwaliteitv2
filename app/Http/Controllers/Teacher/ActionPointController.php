@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\ActionPoint;
 use App\Models\ActionPointStatus;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -20,14 +21,32 @@ class ActionPointController extends Controller implements HasMiddleware
 
     public function index(Request $request)
     {
-        $user   = auth()->user();
+        $user = auth()->user();
         $teamId = $user?->teams->first()?->id;
 
-        $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
-        $isMedewerker   = $user?->hasRole('medewerker');
+        $isGlobalViewer = $user?->hasPermissionTo('view-all-action-points');
+        $isMedewerker = $user?->hasPermissionTo('edit-own-action-point-status')
+                       || $user?->hasPermissionTo('edit-own-action-point-dates');
 
-        $filter   = $request->query('filter', 'all');
+        $filter = $request->query('filter', 'all');
         $statuses = ActionPointStatus::all();
+
+        // Bouw de lijst van teamleden voor de dropdown
+        if ($isGlobalViewer) {
+            $users = User::orderBy('name')->get();
+        } elseif ($teamId) {
+            $users = User::whereHas('teams', fn ($q) => $q->where('teams.id', $teamId))
+                ->orderBy('name')
+                ->get();
+        } else {
+            $users = collect();
+        }
+
+        // Geselecteerde gebruiker uit ?user= parameter (alleen als die in de toegestane lijst zit)
+        $selectedUserId = $request->query('user');
+        $selectedUser = $selectedUserId
+            ? $users->firstWhere('id', (int) $selectedUserId)
+            : null;
 
         $query = ActionPoint::with([
             'status',
@@ -40,9 +59,14 @@ class ActionPointController extends Controller implements HasMiddleware
         if ($isMedewerker) {
             // Medewerker ziet alleen eigen toegewezen actiepunten
             $query->where('user_id', $user->id);
-        } elseif (!$isGlobalViewer && $teamId) {
+        } elseif (! $isGlobalViewer && $teamId) {
             // Kwaliteitszorg / onderwijsleider ziet alleen eigen team
             $query->where('team_id', $teamId);
+        }
+
+        // Extra filter: specifiek teamlid
+        if ($selectedUser) {
+            $query->where('user_id', $selectedUser->id);
         }
 
         if ($filter !== 'all') {
@@ -56,8 +80,10 @@ class ActionPointController extends Controller implements HasMiddleware
 
         return view('teacher.action-points.index', [
             'actionPoints' => $actionPoints,
-            'statuses'     => $statuses,
-            'filter'       => $filter,
+            'statuses' => $statuses,
+            'filter' => $filter,
+            'users' => $users,
+            'selectedUser' => $selectedUser,
         ]);
     }
 }

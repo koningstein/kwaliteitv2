@@ -34,6 +34,36 @@
             @endforeach
         </div>
 
+        {{-- Gebruikersfilter --}}
+        @if($users->isNotEmpty())
+            <div class="flex flex-wrap items-center gap-3">
+                <label for="user-filter" class="text-sm text-slate-600 font-medium">Medewerker:</label>
+                <select id="user-filter"
+                    onchange="
+                        const url = new URL(window.location);
+                        if (this.value) { url.searchParams.set('user', this.value); } else { url.searchParams.delete('user'); }
+                        window.location = url.toString();
+                    "
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300">
+                    <option value="">Alle medewerkers</option>
+                    @foreach($users as $u)
+                        <option value="{{ $u->id }}" {{ $selectedUser?->id === $u->id ? 'selected' : '' }}>
+                            {{ $u->name }}
+                        </option>
+                    @endforeach
+                </select>
+                @if($selectedUser)
+                    <a href="{{ route('teacher.action-points.index', $filter !== 'all' ? ['filter' => $filter] : []) }}"
+                       class="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Filter wissen
+                    </a>
+                @endif
+            </div>
+        @endif
+
         {{-- Actiepunten lijst --}}
         @forelse($actionPoints as $ap)
             @php
