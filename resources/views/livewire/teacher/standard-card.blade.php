@@ -63,21 +63,27 @@
                                 <div class="flex flex-col items-center gap-1.5">
                                     <span class="text-xs font-semibold text-slate-500">{{ $period->label }}</span>
                                     <div class="flex gap-2">
-                                        <button
-                                            wire:click="setScore({{ $criterion->id }}, {{ $period->id }}, 'sufficient')"
-                                            title="Voldoende"
-                                            class="w-8 h-8 rounded-full transition-all bg-emerald-500 ring-emerald-400 {{ $current === 'sufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
-                                        ></button>
-                                        <button
-                                            wire:click="setScore({{ $criterion->id }}, {{ $period->id }}, 'attention')"
-                                            title="Aandacht"
-                                            class="w-8 h-8 rounded-full transition-all bg-amber-500 ring-amber-400 {{ $current === 'attention' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
-                                        ></button>
-                                        <button
-                                            wire:click="setScore({{ $criterion->id }}, {{ $period->id }}, 'insufficient')"
-                                            title="Onvoldoende"
-                                            class="w-8 h-8 rounded-full transition-all bg-rose-500 ring-rose-400 {{ $current === 'insufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
-                                        ></button>
+                                        @can('create', \App\Models\CriterionScore::class)
+                                            <button
+                                                wire:click="setScore({{ $criterion->id }}, {{ $period->id }}, 'sufficient')"
+                                                title="Voldoende"
+                                                class="w-8 h-8 rounded-full transition-all bg-emerald-500 ring-emerald-400 {{ $current === 'sufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
+                                            ></button>
+                                            <button
+                                                wire:click="setScore({{ $criterion->id }}, {{ $period->id }}, 'attention')"
+                                                title="Aandacht"
+                                                class="w-8 h-8 rounded-full transition-all bg-amber-500 ring-amber-400 {{ $current === 'attention' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
+                                            ></button>
+                                            <button
+                                                wire:click="setScore({{ $criterion->id }}, {{ $period->id }}, 'insufficient')"
+                                                title="Onvoldoende"
+                                                class="w-8 h-8 rounded-full transition-all bg-rose-500 ring-rose-400 {{ $current === 'insufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
+                                            ></button>
+                                        @else
+                                            <span class="w-8 h-8 rounded-full bg-emerald-500 {{ $current === 'sufficient' ? 'ring-4 ring-emerald-400 scale-110' : 'opacity-20' }}"></span>
+                                            <span class="w-8 h-8 rounded-full bg-amber-500 {{ $current === 'attention' ? 'ring-4 ring-amber-400 scale-110' : 'opacity-20' }}"></span>
+                                            <span class="w-8 h-8 rounded-full bg-rose-500 {{ $current === 'insufficient' ? 'ring-4 ring-rose-400 scale-110' : 'opacity-20' }}"></span>
+                                        @endcan
                                     </div>
                                 </div>
                             @endforeach
@@ -150,21 +156,24 @@
                             <div class="pt-4 border-t border-slate-100">
                                 <div class="flex items-center justify-between mb-3">
                                     <h5 class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Actiepunten</h5>
-                                    @if($showAddFormFor !== $criterion->id)
-                                        <button
-                                            wire:click="showAddForm({{ $criterion->id }})"
-                                            class="inline-flex items-center gap-1.5 text-xs font-semibold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
-                                        >
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                            </svg>
-                                            Actiepunt toevoegen
-                                        </button>
-                                    @endif
+                                    @can('create', \App\Models\ActionPoint::class)
+                                        @if($showAddFormFor !== $criterion->id)
+                                            <button
+                                                wire:click="showAddForm({{ $criterion->id }})"
+                                                class="inline-flex items-center gap-1.5 text-xs font-semibold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                                Actiepunt toevoegen
+                                            </button>
+                                        @endif
+                                    @endcan
                                 </div>
 
                                 {{-- Nieuw actiepunt formulier --}}
-                                @if($showAddFormFor === $criterion->id)
+                                @can('create', \App\Models\ActionPoint::class)
+                                    @if($showAddFormFor === $criterion->id)
                                     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 space-y-3">
                                         <h6 class="text-sm font-semibold text-slate-800">Nieuw actiepunt</h6>
                                         <div>
@@ -210,6 +219,7 @@
                                         </div>
                                     </div>
                                 @endif
+                                @endcan
 
                                 {{-- Actiepunten lijst --}}
                                 @forelse($criterion->actionPoints as $ap)
@@ -225,8 +235,9 @@
                                     @endphp
 
                                     <div class="border border-slate-400 rounded-xl mb-3 bg-white overflow-hidden">
-                                        @if($editingActionPointId === $ap->id)
-                                            {{-- Edit modus --}}
+                                        @can('update', $ap)
+                                            @if($editingActionPointId === $ap->id)
+                                                {{-- Edit modus --}}
                                             <div class="p-4 space-y-3 bg-amber-50">
                                                 <h6 class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Actiepunt bewerken</h6>
                                                 <div>
@@ -290,8 +301,10 @@
                                                         Annuleren
                                                     </button>
                                                 </div>
-                                            </div>
-                                        @else
+                                                </div>
+                                            @endif
+                                        @endcan
+                                        @if($editingActionPointId !== $ap->id)
                                             {{-- Weergave modus --}}
                                             <div class="p-4">
                                                 <div class="flex items-start justify-between gap-3">
@@ -320,19 +333,23 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center gap-1 flex-shrink-0">
-                                                        <button wire:click="startEditActionPoint({{ $ap->id }})"
-                                                            class="p-1.5 text-slate-600 hover:text-blue-700 rounded-lg hover:bg-blue-50 transition-colors" title="Bewerken">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                                            </svg>
-                                                        </button>
-                                                        <button wire:click="deleteActionPoint({{ $ap->id }})"
-                                                            wire:confirm="Weet je zeker dat je dit actiepunt wilt verwijderen?"
-                                                            class="p-1.5 text-slate-600 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors" title="Verwijderen">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                            </svg>
-                                                        </button>
+                                                        @can('update', $ap)
+                                                            <button wire:click="startEditActionPoint({{ $ap->id }})"
+                                                                class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors" title="Bewerken">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                                </svg>
+                                                            </button>
+                                                        @endcan
+                                                        @can('delete', $ap)
+                                                            <button wire:click="deleteActionPoint({{ $ap->id }})"
+                                                                wire:confirm="Weet je zeker dat je dit actiepunt wilt verwijderen?"
+                                                                class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors" title="Verwijderen">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        @endcan
                                                     </div>
                                                 </div>
 
@@ -342,18 +359,21 @@
                                                         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                                                             Evaluaties ({{ $ap->evaluations->count() }})
                                                         </span>
-                                                        @if($evaluatingId !== $ap->id)
-                                                            <button wire:click="startEvaluation({{ $ap->id }})"
-                                                                class="inline-flex items-center gap-1.5 text-xs font-semibold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
-                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                                </svg>
-                                                                Evaluatie toevoegen
-                                                            </button>
-                                                        @endif
+                                                        @can('create', \App\Models\Evaluation::class)
+                                                            @if($evaluatingId !== $ap->id)
+                                                                <button wire:click="startEvaluation({{ $ap->id }})"
+                                                                    class="inline-flex items-center gap-1.5 text-xs font-semibold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                                    </svg>
+                                                                    Evaluatie toevoegen
+                                                                </button>
+                                                            @endif
+                                                        @endcan
                                                     </div>
 
-                                                    @if($evaluatingId === $ap->id)
+                                                    @can('create', \App\Models\Evaluation::class)
+                                                        @if($evaluatingId === $ap->id)
                                                         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-2 space-y-2">
                                                             <label class="block text-xs font-medium text-slate-700">Nieuwe evaluatie</label>
                                                             <textarea wire:model="newEvaluationText" rows="3"
@@ -372,6 +392,7 @@
                                                             </div>
                                                         </div>
                                                     @endif
+                                                    @endcan
 
                                                     @forelse($ap->evaluations->sortByDesc('created_at') as $eval)
                                                         <div class="bg-slate-100 rounded-lg px-3 py-2 mb-2">

@@ -7,65 +7,69 @@ use App\Models\User;
 class UserPolicy
 {
     /**
-     * Gebruikerslijst inzien: alleen kwaliteitszorg en O&K
+     * Gebruikerslijst inzien: iedereen met manage-team-users
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['kwaliteitszorg', 'ok_medewerker']);
+        return $user->hasPermissionTo('manage-team-users');
     }
 
     /**
-     * Specifieke gebruiker inzien: kwaliteitszorg (eigen team) of O&K
+     * Specifieke gebruiker inzien: manage-team-users + team-scope
+     * ok_medewerker heeft manage-team-users én manage-teams → ziet iedereen
      */
     public function view(User $user, User $model): bool
     {
-        if ($user->hasRole('ok_medewerker')) {
+        if (! $user->hasPermissionTo('manage-team-users')) {
+            return false;
+        }
+
+        // manage-teams = globale beheerdersrol (ok_medewerker): mag iedereen zien
+        if ($user->hasPermissionTo('manage-teams')) {
             return true;
         }
 
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('manage-team-users')) {
-            // Mag alleen gebruikers van zijn eigen team inzien
-            $userTeamIds = $user->teams->pluck('id');
-            $modelTeamIds = $model->teams->pluck('id');
-            return $userTeamIds->intersect($modelTeamIds)->isNotEmpty();
-        }
+        // Kwaliteitszorg: alleen gebruikers van eigen team
+        $userTeamIds = $user->teams->pluck('id');
+        $modelTeamIds = $model->teams->pluck('id');
 
-        return false;
+        return $userTeamIds->intersect($modelTeamIds)->isNotEmpty();
     }
 
     /**
-     * Gebruiker aanmaken: kwaliteitszorg (voor eigen team) of O&K
+     * Gebruiker aanmaken: manage-team-users
      */
     public function create(User $user): bool
     {
-        return $user->hasRole(['kwaliteitszorg', 'ok_medewerker'])
-            && $user->hasPermissionTo('manage-team-users');
+        return $user->hasPermissionTo('manage-team-users');
     }
 
     /**
-     * Gebruiker bewerken: kwaliteitszorg (eigen team) of O&K
+     * Gebruiker bewerken: manage-team-users + team-scope
      */
     public function update(User $user, User $model): bool
     {
-        if ($user->hasRole('ok_medewerker')) {
+        if (! $user->hasPermissionTo('manage-team-users')) {
+            return false;
+        }
+
+        // manage-teams = globale beheerdersrol (ok_medewerker): mag iedereen bewerken
+        if ($user->hasPermissionTo('manage-teams')) {
             return true;
         }
 
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('manage-team-users')) {
-            $userTeamIds = $user->teams->pluck('id');
-            $modelTeamIds = $model->teams->pluck('id');
-            return $userTeamIds->intersect($modelTeamIds)->isNotEmpty();
-        }
+        // Kwaliteitszorg: alleen gebruikers van eigen team
+        $userTeamIds = $user->teams->pluck('id');
+        $modelTeamIds = $model->teams->pluck('id');
 
-        return false;
+        return $userTeamIds->intersect($modelTeamIds)->isNotEmpty();
     }
 
     /**
-     * Gebruiker verwijderen: kwaliteitszorg (eigen team) of O&K
+     * Gebruiker verwijderen: manage-team-users + team-scope + niet zichzelf
      */
     public function delete(User $user, User $model): bool
     {
-        // Niemand mag zichzelf verwijderen
         if ($user->id === $model->id) {
             return false;
         }
@@ -84,7 +88,7 @@ class UserPolicy
     }
 
     /**
-     * Kwaliteitsmedewerker toewijzen aan team: O&K of onderwijsleider
+     * Kwaliteitsmedewerker toewijzen aan team: assign-team-quality-member
      */
     public function assignQualityMember(User $user): bool
     {

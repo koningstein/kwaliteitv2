@@ -14,16 +14,22 @@ class TeamPolicy
 
     public function view(User $user, Team $team): bool
     {
-        // Onderwijsleider en medewerkers mogen alleen hun eigen teams zien
-        if ($user->hasRole('onderwijsleider')) {
+        if (! $user->hasPermissionTo('view-team-dashboard')) {
+            return false;
+        }
+
+        // ok_medewerker en directie met manage-teams mogen alle teams zien
+        if ($user->hasPermissionTo('manage-teams')) {
+            return true;
+        }
+
+        // Onderwijsleider heeft assign-team-quality-member: ziet alleen zijn beheerde teams
+        if ($user->hasPermissionTo('assign-team-quality-member')) {
             return $user->managedTeams->contains($team->id);
         }
 
-        if ($user->hasRole('medewerker') || $user->hasRole('kwaliteitszorg')) {
-            return $user->teams->contains($team->id);
-        }
-
-        return $user->hasPermissionTo('view-team-dashboard');
+        // Overige rollen (medewerker, kwaliteitszorg): alleen eigen teams
+        return $user->teams->contains($team->id);
     }
 
     public function create(User $user): bool

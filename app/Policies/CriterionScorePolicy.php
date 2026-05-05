@@ -14,12 +14,12 @@ class CriterionScorePolicy
 
     public function view(User $user, CriterionScore $criterionScore): bool
     {
-        if (!$user->hasPermissionTo('view-criteria-scores')) {
+        if (! $user->hasPermissionTo('view-criteria-scores')) {
             return false;
         }
 
-        // O&K en directie mogen alles inzien
-        if ($user->hasRole(['ok_medewerker', 'directie'])) {
+        // Gebruikers met manage-teams of view-all-action-points mogen alles inzien (O&K, directie)
+        if ($user->hasPermissionTo('manage-teams') || $user->hasPermissionTo('view-all-action-points')) {
             return true;
         }
 
@@ -35,17 +35,13 @@ class CriterionScorePolicy
 
     public function update(User $user, CriterionScore $criterionScore): bool
     {
-        if (!$user->hasPermissionTo('edit-criteria-scores')) {
+        if (! $user->hasPermissionTo('edit-criteria-scores')) {
             return false;
         }
 
-        // Alleen kwaliteitszorg mag scores bewerken, en alleen van zijn eigen team
-        if ($user->hasRole('kwaliteitszorg')) {
-            return $criterionScore->team_id !== null
-                && $user->teams->contains($criterionScore->team_id);
-        }
-
-        return false;
+        // edit-criteria-scores is alleen toegewezen aan kwaliteitszorg: eigen team
+        return $criterionScore->team_id !== null
+            && $user->teams->contains($criterionScore->team_id);
     }
 
     public function delete(User $user, CriterionScore $criterionScore): bool

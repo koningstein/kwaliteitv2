@@ -14,11 +14,17 @@ class EvaluationPolicy
 
     public function view(User $user, Evaluation $evaluation): bool
     {
-        if ($user->hasRole('medewerker')) {
+        if (! $user->hasPermissionTo('view-action-points')) {
+            return false;
+        }
+
+        // Gebruikers zonder edit-rechten (medewerker) mogen alleen evaluaties zien
+        // van actiepunten die aan hen zijn toegewezen.
+        if (! $user->hasPermissionTo('edit-action-points') && ! $user->hasPermissionTo('view-all-action-points')) {
             return $evaluation->actionPoint->user_id === $user->id;
         }
 
-        return $user->hasPermissionTo('view-action-points');
+        return true;
     }
 
     public function create(User $user): bool

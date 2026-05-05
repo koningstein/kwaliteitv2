@@ -41,25 +41,30 @@ class RolePermissionSeeder extends Seeder
             // Gebruikers- en teambeheer
             'manage-team-users',            // kwaliteitsmedewerker: users van eigen team beheren
             'assign-team-quality-member',   // O&K + teamleider: kwaliteitsmedewerker toewijzen aan team
+            'manage-teams',                 // O&K: teams aanmaken/bewerken/verwijderen
 
             // Dashboards
             'view-directie-dashboard',
             'view-team-dashboard',
+
+            // Actiepunten (uitgebreid zichtbereik)
+            'view-all-action-points',       // ok_medewerker + directie: alle actiepunten van alle teams zien
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
         // -----------------------------------------------------------------------
         // Rol: directie
         // Mag alles inzien, niets bewerken
         // -----------------------------------------------------------------------
-        $directie = Role::create(['name' => 'directie']);
+        $directie = Role::firstOrCreate(['name' => 'directie']);
         $directie->givePermissionTo([
             'view-dashboard',
             'view-themes',
             'view-action-points',
+            'view-all-action-points',
             'view-criteria-scores',
             'view-directie-dashboard',
             'view-team-dashboard',
@@ -71,7 +76,7 @@ class RolePermissionSeeder extends Seeder
         // voor alle teams. Mag ook kwaliteitsmedewerkers toewijzen aan teams.
         // Mag alles inzien.
         // -----------------------------------------------------------------------
-        $ok = Role::create(['name' => 'ok_medewerker']);
+        $ok = Role::firstOrCreate(['name' => 'ok_medewerker']);
         $ok->givePermissionTo([
             'view-dashboard',
             'view-themes',
@@ -81,8 +86,11 @@ class RolePermissionSeeder extends Seeder
             'manage-indicators',
             'copy-period',
             'view-action-points',
+            'view-all-action-points',
             'view-criteria-scores',
             'assign-team-quality-member',
+            'manage-team-users',
+            'manage-teams',
             'view-directie-dashboard',
             'view-team-dashboard',
         ]);
@@ -93,7 +101,7 @@ class RolePermissionSeeder extends Seeder
         // Beheert actiepunten voor zijn eigen team.
         // Beheert gebruikers van zijn eigen team.
         // -----------------------------------------------------------------------
-        $kwaliteit = Role::create(['name' => 'kwaliteitszorg']);
+        $kwaliteit = Role::firstOrCreate(['name' => 'kwaliteitszorg']);
         $kwaliteit->givePermissionTo([
             'view-dashboard',
             'view-themes',
@@ -112,7 +120,7 @@ class RolePermissionSeeder extends Seeder
         // Mag kwaliteitsmedewerkers toewijzen aan zijn team(s).
         // Mag alles inzien van zijn eigen team(s).
         // -----------------------------------------------------------------------
-        $onderwijsleider = Role::create(['name' => 'onderwijsleider']);
+        $onderwijsleider = Role::firstOrCreate(['name' => 'onderwijsleider']);
         $onderwijsleider->givePermissionTo([
             'view-dashboard',
             'view-themes',
@@ -126,7 +134,7 @@ class RolePermissionSeeder extends Seeder
         // Rol: medewerker (= docent)
         // Mag zijn eigen toegewezen actiepunten bekijken en de status/datums wijzigen.
         // -----------------------------------------------------------------------
-        $medewerker = Role::create(['name' => 'medewerker']);
+        $medewerker = Role::firstOrCreate(['name' => 'medewerker']);
         $medewerker->givePermissionTo([
             'view-dashboard',
             'view-themes',

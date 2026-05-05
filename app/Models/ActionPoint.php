@@ -12,7 +12,18 @@ class ActionPoint extends Model
     /** @use HasFactory<\Database\Factories\ActionPointFactory> */
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'created_by', 'updated_by'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (ActionPoint $model) {
+            $model->created_by = auth()->id();
+        });
+
+        static::updating(function (ActionPoint $model) {
+            $model->updated_by = auth()->id();
+        });
+    }
 
     public function criterion(): BelongsTo
     {
@@ -32,6 +43,16 @@ class ActionPoint extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(ActionPointStatus::class, 'action_point_status_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function evaluations(): HasMany

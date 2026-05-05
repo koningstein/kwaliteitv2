@@ -28,24 +28,30 @@
                 <div class="flex flex-col items-center gap-1.5">
                     <span class="text-xs font-semibold text-slate-500">{{ $period->label }}</span>
                     <div class="flex gap-1.5">
-                        <button
-                            wire:click="setScore({{ $period->id }}, 'sufficient')"
-                            title="Voldoende"
-                            class="w-8 h-8 rounded-full transition-all bg-emerald-500 ring-emerald-400
-                                {{ $current === 'sufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
-                        ></button>
-                        <button
-                            wire:click="setScore({{ $period->id }}, 'attention')"
-                            title="Aandacht"
-                            class="w-8 h-8 rounded-full transition-all bg-amber-500 ring-amber-400
-                                {{ $current === 'attention' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
-                        ></button>
-                        <button
-                            wire:click="setScore({{ $period->id }}, 'insufficient')"
-                            title="Onvoldoende"
-                            class="w-8 h-8 rounded-full transition-all bg-rose-500 ring-rose-400
-                                {{ $current === 'insufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
-                        ></button>
+                        @can('create', \App\Models\CriterionScore::class)
+                            <button
+                                wire:click="setScore({{ $period->id }}, 'sufficient')"
+                                title="Voldoende"
+                                class="w-8 h-8 rounded-full transition-all bg-emerald-500 ring-emerald-400
+                                    {{ $current === 'sufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
+                            ></button>
+                            <button
+                                wire:click="setScore({{ $period->id }}, 'attention')"
+                                title="Aandacht"
+                                class="w-8 h-8 rounded-full transition-all bg-amber-500 ring-amber-400
+                                    {{ $current === 'attention' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
+                            ></button>
+                            <button
+                                wire:click="setScore({{ $period->id }}, 'insufficient')"
+                                title="Onvoldoende"
+                                class="w-8 h-8 rounded-full transition-all bg-rose-500 ring-rose-400
+                                    {{ $current === 'insufficient' ? 'ring-4 scale-110' : 'opacity-30 hover:opacity-70' }}"
+                            ></button>
+                        @else
+                            <span class="w-8 h-8 rounded-full bg-emerald-500 {{ $current === 'sufficient' ? 'ring-4 ring-emerald-400 scale-110' : 'opacity-20' }}"></span>
+                            <span class="w-8 h-8 rounded-full bg-amber-500 {{ $current === 'attention' ? 'ring-4 ring-amber-400 scale-110' : 'opacity-20' }}"></span>
+                            <span class="w-8 h-8 rounded-full bg-rose-500 {{ $current === 'insufficient' ? 'ring-4 ring-rose-400 scale-110' : 'opacity-20' }}"></span>
+                        @endcan
                     </div>
                 </div>
             @endforeach

@@ -9,10 +9,15 @@ use Livewire\Component;
 class CriterionCard extends Component
 {
     public int $criterionId;
+
     public $periods = [];
+
     public array $scores = [];
+
     public bool $isOpen = false;
+
     public string $explanation = '';
+
     public bool $editingExplanation = false;
 
     private function userTeamId(): ?int
@@ -23,7 +28,7 @@ class CriterionCard extends Component
     public function mount(Criterion $criterion, $periods): void
     {
         $this->criterionId = $criterion->id;
-        $this->periods     = $periods;
+        $this->periods = $periods;
         $this->explanation = $criterion->explanation ?? '';
 
         $teamId = $this->userTeamId();
@@ -41,21 +46,23 @@ class CriterionCard extends Component
 
     public function toggle(): void
     {
-        $this->isOpen = !$this->isOpen;
+        $this->isOpen = ! $this->isOpen;
     }
 
     public function setScore(int $periodId, string $status): void
     {
+        Gate::authorize('create', CriterionScore::class);
+
         $teamId = $this->userTeamId();
 
         CriterionScore::updateOrCreate(
             [
-                'criterion_id'        => $this->criterionId,
+                'criterion_id' => $this->criterionId,
                 'reporting_period_id' => $periodId,
-                'team_id'             => $teamId,
+                'team_id' => $teamId,
             ],
             [
-                'status'     => $status,
+                'status' => $status,
                 'updated_by' => optional(auth()->user())->id,
             ]
         );

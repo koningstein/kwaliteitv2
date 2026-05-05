@@ -14,60 +14,52 @@ class ActionPointPolicy
 
     public function view(User $user, ActionPoint $actionPoint): bool
     {
-        if (!$user->hasPermissionTo('view-action-points')) {
+        if (! $user->hasPermissionTo('view-action-points')) {
             return false;
         }
 
-        // O&K en directie mogen alles inzien
-        if ($user->hasRole(['ok_medewerker', 'directie'])) {
+        // view-all-action-points: ziet alles (ok_medewerker, directie)
+        if ($user->hasPermissionTo('view-all-action-points')) {
             return true;
         }
 
-        // Kwaliteitszorg en onderwijsleider: alleen eigen team
-        if ($user->hasRole(['kwaliteitszorg', 'onderwijsleider'])) {
+        // Medewerker-scope: edit-own-* permissions → alleen eigen toegewezen actiepunten
+        if ($user->hasPermissionTo('edit-own-action-point-status') || $user->hasPermissionTo('edit-own-action-point-dates')) {
+            return $actionPoint->user_id === $user->id;
+        }
+
+        // Iedereen met view-action-points maar zonder view-all: eigen team (kwaliteitszorg, onderwijsleider)
+        return $actionPoint->team_id !== null
+            && $user->teams->contains($actionPoint->team_id);
+    }
+
+    public function create(User $user): bool
+    {
+        return $user->hasPermissionTo('create-action-points');
+    }
+
+    public function update(User $user, ActionPoint $actionPoint): bool
+    {
+        // Volledige bewerking: edit-action-points + eigen team
+        if ($user->hasPermissionTo('edit-action-points')) {
             return $actionPoint->team_id !== null
                 && $user->teams->contains($actionPoint->team_id);
         }
 
-        // Medewerker: alleen eigen toegewezen actiepunten
-        if ($user->hasRole('medewerker')) {
+        // Beperkte bewerking: medewerker mag status of datums van eigen actiepunt wijzigen
+        if ($user->hasPermissionTo('edit-own-action-point-status') || $user->hasPermissionTo('edit-own-action-point-dates')) {
             return $actionPoint->user_id === $user->id;
         }
 
         return false;
     }
 
-    public function create(User $user): bool
-    {
-        // Alleen kwaliteitszorg mag actiepunten aanmaken (voor zijn eigen team)
-        return $user->hasRole('kwaliteitszorg')
-            && $user->hasPermissionTo('create-action-points');
-    }
-
-    public function update(User $user, ActionPoint $actionPoint): bool
-    {
-        // Kwaliteitszorg: mag actiepunten van eigen team bewerken
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('edit-action-points')) {
-            return $actionPoint->team_id !== null
-                && $user->teams->contains($actionPoint->team_id);
-        }
-
-        // Medewerker: mag eigen actiepunt status of datums wijzigen
-        if ($user->hasRole('medewerker')) {
-            return $actionPoint->user_id === $user->id
-                && ($user->hasPermissionTo('edit-own-action-point-status')
-                    || $user->hasPermissionTo('edit-own-action-point-dates'));
-        }
-
-        return false;
-    }
-
     /**
-     * Beschrijving bewerken: alleen kwaliteitszorg van eigen team
+     * Beschrijving bewerken: vereist edit-action-points + eigen team
      */
     public function updateDescription(User $user, ActionPoint $actionPoint): bool
     {
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('edit-action-points')) {
+        if ($user->hasPermissionTo('edit-action-points')) {
             return $actionPoint->team_id !== null
                 && $user->teams->contains($actionPoint->team_id);
         }
@@ -76,36 +68,34 @@ class ActionPointPolicy
     }
 
     /**
-     * Status bewerken: kwaliteitszorg (eigen team) of medewerker (eigen actiepunt)
+     * Status bewerken: edit-action-points (eigen team) of edit-own-action-point-status (eigen actiepunt)
      */
     public function updateStatus(User $user, ActionPoint $actionPoint): bool
     {
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('edit-action-points')) {
+        if ($user->hasPermissionTo('edit-action-points')) {
             return $actionPoint->team_id !== null
                 && $user->teams->contains($actionPoint->team_id);
         }
 
-        if ($user->hasRole('medewerker')) {
-            return $actionPoint->user_id === $user->id
-                && $user->hasPermissionTo('edit-own-action-point-status');
+        if ($user->hasPermissionTo('edit-own-action-point-status')) {
+            return $actionPoint->user_id === $user->id;
         }
 
         return false;
     }
 
     /**
-     * Datums bewerken: kwaliteitszorg (eigen team) of medewerker (eigen actiepunt)
+     * Datums bewerken: edit-action-points (eigen team) of edit-own-action-point-dates (eigen actiepunt)
      */
     public function updateDates(User $user, ActionPoint $actionPoint): bool
     {
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('edit-action-points')) {
+        if ($user->hasPermissionTo('edit-action-points')) {
             return $actionPoint->team_id !== null
                 && $user->teams->contains($actionPoint->team_id);
         }
 
-        if ($user->hasRole('medewerker')) {
-            return $actionPoint->user_id === $user->id
-                && $user->hasPermissionTo('edit-own-action-point-dates');
+        if ($user->hasPermissionTo('edit-own-action-point-dates')) {
+            return $actionPoint->user_id === $user->id;
         }
 
         return false;
@@ -113,7 +103,7 @@ class ActionPointPolicy
 
     public function delete(User $user, ActionPoint $actionPoint): bool
     {
-        if ($user->hasRole('kwaliteitszorg') && $user->hasPermissionTo('delete-action-points')) {
+        if ($user->hasPermissionTo('delete-action-points')) {
             return $actionPoint->team_id !== null
                 && $user->teams->contains($actionPoint->team_id);
         }
