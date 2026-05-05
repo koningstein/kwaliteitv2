@@ -2,6 +2,15 @@
     <div class="bg-white border-2 border-slate-200 rounded-xl p-12 text-center">
         <p class="text-slate-400 text-sm">Geen teamleden gevonden.</p>
     </div>
+@elseif($users->every(fn($u) => $u->actionPoints->isEmpty()))
+    <div class="bg-white border-2 border-slate-200 rounded-xl p-12 text-center">
+        <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <p class="text-slate-500 font-medium">Nog geen actiepunten voor dit team.</p>
+        <p class="text-slate-400 text-sm mt-1">Er zijn {{ $users->count() }} teamleden, maar er zijn nog geen actiepunten aan hen gekoppeld.</p>
+    </div>
 @else
     {{-- Verlopende deadlines waarschuwing --}}
     @php
