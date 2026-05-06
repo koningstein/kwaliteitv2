@@ -2,6 +2,24 @@
     <x-slot name="title">Dashboard — Kwaliteit in Beeld</x-slot>
 
     <div class="space-y-8">
+
+        {{-- Team-tabs --}}
+        @if($teams->count() > 1)
+            <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+                @foreach($teams as $team)
+                        <a href="{{ route('teacher.dashboard', ['team' => $team->id]) }}"
+                       class="px-5 py-2 rounded-lg text-sm font-medium transition-all
+                              {{ $activeTeam?->id === $team->id
+                                  ? 'bg-white text-slate-900 shadow-sm'
+                                  : 'text-slate-500 hover:text-slate-700' }}">
+                        {{ $team->name }}
+                    </a>
+                @endforeach
+            </div>
+        @elseif($activeTeam)
+            <div class="text-sm font-semibold text-slate-700">{{ $activeTeam->name }}</div>
+        @endif
+
         {{-- Export buttons --}}
         <div class="flex items-center gap-3">
             <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-sm">
@@ -32,7 +50,7 @@
         <div>
             <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Actiepunten</h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                <a href="{{ route('teacher.action-points.index') }}"
+                <a href="{{ route('teacher.action-points.index', array_filter(['team' => $activeTeam?->id])) }}"
                    class="bg-white border-2 border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all text-center">
                     <div class="flex items-center justify-center mb-2">
                         <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +104,7 @@
                         ];
                         $colors = $colorMap[$status->name] ?? $colorMap['Niet gestart'];
                     @endphp
-                    <a href="{{ route('teacher.action-points.index', ['filter' => $status->id]) }}"
+                    <a href="{{ route('teacher.action-points.index', array_filter(['team' => $activeTeam?->id, 'filter' => $status->id])) }}"
                        class="border-2 rounded-xl p-5 hover:shadow-md transition-all text-center {{ $colors['bg'] }} {{ $colors['hover'] }}">
                         <div class="flex items-center justify-center mb-2">
                             @if($status->name === 'Op schema' || $status->name === 'Afgerond')

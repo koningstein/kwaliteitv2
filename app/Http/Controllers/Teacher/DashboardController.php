@@ -7,7 +7,9 @@ use App\Models\ActionPoint;
 use App\Models\ActionPointStatus;
 use App\Models\CriterionScore;
 use App\Models\ReportingPeriod;
+use App\Models\Team;
 use App\Models\Theme;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -20,13 +22,28 @@ class DashboardController extends Controller implements HasMiddleware
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $user   = auth()->user();
-        $teamId = $user?->teams->first()?->id;
-
-        // O&K en directie zien alles; anderen zien alleen hun eigen team
+        $user           = auth()->user();
         $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
+
+        // Beschikbare teams ophalen — zelfde logica als TeamController
+        if ($isGlobalViewer) {
+            $teams = Team::orderBy('name')->get();
+        } else {
+            $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
+            $teams   = $managed->isNotEmpty()
+                ? $managed
+                : ($user?->teams()->orderBy('name')->get() ?? collect());
+        }
+
+        // Actief team bepalen via ?team= queryparameter
+        $teamIdParam = $request->query('team');
+        $activeTeam  = $teamIdParam
+            ? $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first()
+            : $teams->first();
+
+        $teamId = $activeTeam?->id;
 
         // Actiepunten statistieken
         $statuses = ActionPointStatus::withCount([
@@ -35,7 +52,7 @@ class DashboardController extends Controller implements HasMiddleware
                 : $q,
         ])->get();
 
-        $totalActionPoints = $isGlobalViewer || !$teamId
+        $totalActionPoints = ($isGlobalViewer && !$teamId)
             ? ActionPoint::count()
             : ActionPoint::where('team_id', $teamId)->count();
 
@@ -47,6 +64,8 @@ class DashboardController extends Controller implements HasMiddleware
             $query = CriterionScore::where('reporting_period_id', $period->id);
 
             if (!$isGlobalViewer && $teamId) {
+                $query->where('team_id', $teamId);
+            } elseif ($teamId) {
                 $query->where('team_id', $teamId);
             }
 
@@ -85,10 +104,10 @@ class DashboardController extends Controller implements HasMiddleware
         // Statistieken per thema
         $activePeriodIds = $periods->pluck('id');
 
-        $themes = Theme::with(['standards.criteria.scores' => function ($q) use ($activePeriodIds, $teamId, $isGlobalViewer) {
+        $themes = Theme::with(['standards.criteria.scores' => function ($q) use ($activePeriodIds, $teamId) {
             $q->whereIn('reporting_period_id', $activePeriodIds);
 
-            if (!$isGlobalViewer && $teamId) {
+            if ($teamId) {
                 $q->where('team_id', $teamId);
             }
         }])->get();
@@ -103,6 +122,9 @@ class DashboardController extends Controller implements HasMiddleware
                 return [
                     'theme'            => $theme,
                     'total'            => 0,
+                    'sufficient'       => 0,
+                    'attention'        => 0,
+                    'insufficient'     => 0,
                     'pct_sufficient'   => 0,
                     'pct_attention'    => 0,
                     'pct_insufficient' => 0,
@@ -119,9 +141,11 @@ class DashboardController extends Controller implements HasMiddleware
                 'pct_attention'    => round($scores->where('status', 'attention')->count() / $total * 100),
                 'pct_insufficient' => round($scores->where('status', 'insufficient')->count() / $total * 100),
             ];
-        });
+        })->filter(fn ($stat) => $stat['total'] > 0)->values();
 
         return view('teacher.dashboard', [
+            'teams'             => $teams,
+            'activeTeam'        => $activeTeam,
             'statuses'          => $statuses,
             'totalActionPoints' => $totalActionPoints,
             'periodStats'       => $periodStats,
