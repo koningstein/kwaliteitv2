@@ -50,10 +50,10 @@
                     @php
                         $colorMap = [
                             'Niet gestart'  => ['active' => 'bg-slate-600 text-white', 'idle' => 'border-slate-200 text-slate-600 hover:bg-slate-50'],
-                            'Op schema'     => ['active' => 'bg-blue-600 text-white', 'idle' => 'border-blue-200 text-emerald-700 hover:bg-blue-50'],
+                            'Op schema'     => ['active' => 'bg-blue-600 text-white', 'idle' => 'border-blue-200 text-blue-700 hover:bg-blue-50'],
                             'Loopt achter'  => ['active' => 'bg-amber-600 text-white', 'idle' => 'border-amber-200 text-amber-700 hover:bg-amber-50'],
                             'Uitgesteld'    => ['active' => 'bg-orange-500 text-white', 'idle' => 'border-orange-200 text-orange-700 hover:bg-orange-50'],
-                            'Afgerond'      => ['active' => 'bg-emerald-600 text-white', 'idle' => 'border-emerald-200 text-blue-700 hover:bg-emerald-50'],
+                            'Afgerond'      => ['active' => 'bg-emerald-600 text-white', 'idle' => 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'],
                         ];
                         $c = $colorMap[$status->name] ?? $colorMap['Niet gestart'];
                         $isActive = (string)$filter === (string)$status->id;

@@ -83,10 +83,10 @@
                         @php
                             $colorMap = [
                                 'Niet gestart' => 'text-slate-500',
-                                'Op schema'    => 'text-emerald-600',
+                                'Op schema'    => 'text-blue-600',
                                 'Loopt achter' => 'text-amber-600',
                                 'Uitgesteld'   => 'text-orange-600',
-                                'Afgerond'     => 'text-blue-600',
+                                'Afgerond'     => 'text-emerald-600',
                             ];
                             $color = $colorMap[$statusName] ?? 'text-slate-500';
                         @endphp

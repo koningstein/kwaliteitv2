@@ -56,11 +56,11 @@
                                 'detail' => 'text-slate-400',
                             ],
                             'Op schema' => [
-                                'text'   => 'text-emerald-700',
-                                'bg'     => 'bg-white border-emerald-300',
-                                'hover'  => 'hover:border-emerald-400',
-                                'icon'   => 'text-emerald-400',
-                                'detail' => 'text-emerald-400',
+                                'text'   => 'text-blue-700',
+                                'bg'     => 'bg-white border-blue-300',
+                                'hover'  => 'hover:border-blue-400',
+                                'icon'   => 'text-blue-400',
+                                'detail' => 'text-blue-400',
                             ],
                             'Loopt achter' => [
                                 'text'   => 'text-amber-700',
@@ -77,11 +77,11 @@
                                 'detail' => 'text-orange-400',
                             ],
                             'Afgerond' => [
-                                'text'   => 'text-blue-700',
-                                'bg'     => 'bg-white border-blue-300',
-                                'hover'  => 'hover:border-blue-400',
-                                'icon'   => 'text-blue-400',
-                                'detail' => 'text-blue-400',
+                                'text'   => 'text-emerald-700',
+                                'bg'     => 'bg-white border-emerald-300',
+                                'hover'  => 'hover:border-emerald-400',
+                                'icon'   => 'text-emerald-400',
+                                'detail' => 'text-emerald-400',
                             ],
                         ];
                         $colors = $colorMap[$status->name] ?? $colorMap['Niet gestart'];

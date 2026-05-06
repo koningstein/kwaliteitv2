@@ -223,16 +223,7 @@
 
                                 {{-- Actiepunten lijst --}}
                                 @forelse($criterion->actionPoints as $ap)
-                                    @php
-                                        $badgeMap = [
-                                            'Niet gestart' => 'bg-slate-100 text-slate-700 border border-slate-300',
-                                            'Op schema'    => 'bg-emerald-100 text-emerald-700 border border-emerald-300',
-                                            'Loopt achter' => 'bg-amber-100 text-amber-700 border border-amber-300',
-                                            'Uitgesteld'   => 'bg-orange-100 text-orange-700 border border-orange-300',
-                                            'Afgerond'     => 'bg-blue-100 text-blue-700 border border-blue-300',
-                                        ];
-                                        $badge = $badgeMap[$ap->status?->name] ?? $badgeMap['Niet gestart'];
-                                    @endphp
+
 
                                     <div class="border border-slate-400 rounded-xl mb-3 bg-white overflow-hidden">
                                         @can('update', $ap)
@@ -326,9 +317,7 @@
                                                                 </span>
                                                             @endif
                                                             @if($ap->status)
-                                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badge }}">
-                                                                    {{ $ap->status->name }}
-                                                                </span>
+                                                                <x-status-badge :status="$ap->status->name" />
                                                             @endif
                                                         </div>
                                                     </div>
