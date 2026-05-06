@@ -9,6 +9,7 @@ use App\Models\CriterionScore;
 use App\Models\ReportingPeriod;
 use App\Models\Team;
 use App\Models\Theme;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -151,5 +152,71 @@ class DashboardController extends Controller implements HasMiddleware
             'periodStats'       => $periodStats,
             'themeStats'        => $themeStats,
         ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $user           = auth()->user();
+        $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
+
+        if ($isGlobalViewer) {
+            $teams = Team::orderBy('name')->get();
+        } else {
+            $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
+            $teams   = $managed->isNotEmpty()
+                ? $managed
+                : ($user?->teams()->orderBy('name')->get() ?? collect());
+        }
+
+        $teamIdParam = $request->query('team');
+        $activeTeam  = $teamIdParam
+            ? $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first()
+            : $teams->first();
+
+        if (! $activeTeam) {
+            abort(404);
+        }
+
+        $teamId = $activeTeam->id;
+
+        // Teamleden, teamleiders, locaties en kwaliteitszorgmedewerkers
+        $activeTeam->load(['users.roles', 'leaders', 'locations']);
+
+        $teamMembers           = $activeTeam->users;
+        $teamLeaders           = $activeTeam->leaders;
+        $kwaliteitsMedewerkers = $activeTeam->users->filter(fn ($u) => $u->hasRole('kwaliteitszorg'));
+
+        // Rapportageperiodes
+        $periods = ReportingPeriod::orderBy('sort_order')->get();
+
+        // Volledige thema-hiërarchie met scores en actiepunten voor dit team
+        $themes = Theme::with([
+            'standards'                                      => fn ($q) => $q->orderBy('code'),
+            'standards.criteria'                             => fn ($q) => $q->orderBy('number'),
+            'standards.criteria.indicators'                  => fn ($q) => $q->orderBy('sort_order'),
+            'standards.criteria.scores'                      => fn ($q) => $q->where('team_id', $teamId),
+            'standards.criteria.actionPoints'                => fn ($q) => $q->where('team_id', $teamId)
+                ->with([
+                    'status',
+                    'user',
+                    'evaluations' => fn ($eq) => $eq->with('creator')->orderBy('created_at'),
+                ])
+                ->orderBy('created_at'),
+        ])->orderBy('code')->get();
+
+        $pdf = Pdf::loadView('teacher.exports.dashboard-pdf', [
+            'activeTeam'            => $activeTeam,
+            'teamMembers'           => $teamMembers,
+            'teamLeaders'           => $teamLeaders,
+            'kwaliteitsMedewerkers' => $kwaliteitsMedewerkers,
+            'locations'             => $activeTeam->locations,
+            'periods'               => $periods,
+            'themes'                => $themes,
+            'exportDate'            => now()->format('d-m-Y'),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'kwaliteit-in-beeld-' . str($activeTeam->name)->slug() . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

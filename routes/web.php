@@ -48,4 +48,5 @@ Route::middleware(['auth', 'verified', 'role:ok_medewerker|kwaliteitszorg|onderw
     Route::get('/themes/{theme}', [TeacherThemeController::class, 'show'])->name('themes.show');
     Route::get('/team', [TeacherTeamController::class, 'index'])->name('team.index');
     Route::get('/action-points', [TeacherActionPointController::class, 'index'])->name('action-points.index');
+    Route::get('/export/pdf', [TeacherDashboardController::class, 'exportPdf'])->name('dashboard.export-pdf');
 });
