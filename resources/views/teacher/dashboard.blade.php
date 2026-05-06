@@ -109,15 +109,88 @@
             </div>
         </div>
 
-        {{-- Voortgang per rapportageperiode --}}
-        <div>
-            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Voortgang per periode</h2>
+        {{-- Voortgang per Jaar (standaard ingeklapt) --}}
+        <div x-data="{ open: false }" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+
+            {{-- Klikbare header — altijd zichtbaar --}}
+            <button @click="open = !open"
+                    class="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-base font-semibold text-slate-800">Voortgang per periode</h2>
+                    <span x-show="!open" class="text-xs text-slate-400 font-normal">Klik om uit te vouwen</span>
+                </div>
+                <svg :class="{ 'rotate-180': open }"
+                     class="w-5 h-5 text-slate-400 transition-transform duration-200 flex-shrink-0"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            {{-- Inhoud — standaard verborgen --}}
+            <div x-show="open"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="border-t border-slate-200 px-6 py-6 space-y-6">
+                @foreach($periodStats as $stat)
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-700 mb-3">{{ $stat['period']->label }}</h4>
+                        @if($stat['total'] > 0)
+                            <div class="space-y-2">
+                                <div class="flex gap-1 h-8 rounded-lg overflow-hidden">
+                                    @if($stat['sufficient'] > 0)
+                                        <div class="bg-emerald-500 flex items-center justify-center text-white text-xs font-medium"
+                                             style="width: {{ $stat['pct_sufficient'] }}%">
+                                            {{ $stat['sufficient'] }}
+                                        </div>
+                                    @endif
+                                    @if($stat['attention'] > 0)
+                                        <div class="bg-amber-500 flex items-center justify-center text-white text-xs font-medium"
+                                             style="width: {{ $stat['pct_attention'] }}%">
+                                            {{ $stat['attention'] }}
+                                        </div>
+                                    @endif
+                                    @if($stat['insufficient'] > 0)
+                                        <div class="bg-rose-500 flex items-center justify-center text-white text-xs font-medium"
+                                             style="width: {{ $stat['pct_insufficient'] }}%">
+                                            {{ $stat['insufficient'] }}
+                                        </div>
+                                    @endif
+                                    @php $pctNone = max(0, 100 - $stat['pct_sufficient'] - $stat['pct_attention'] - $stat['pct_insufficient']); @endphp
+                                    @if($pctNone > 0)
+                                        <div class="bg-slate-200 h-full flex-1"></div>
+                                    @endif
+                                </div>
+                                <div class="flex justify-between text-xs text-slate-600">
+                                    <span>🟢 {{ $stat['sufficient'] }} Voldoende ({{ $stat['pct_sufficient'] }}%)</span>
+                                    <span>🟠 {{ $stat['attention'] }} Aandacht ({{ $stat['pct_attention'] }}%)</span>
+                                    <span>🔴 {{ $stat['insufficient'] }} Onvoldoende ({{ $stat['pct_insufficient'] }}%)</span>
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-sm text-slate-400">Geen data</div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Voortgang per Thema (altijd zichtbaar) --}}
+        @if($themeStats->isNotEmpty())
             <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <h3 class="text-xl font-bold text-slate-900 mb-6">Voortgang per Jaar</h3>
+                <h2 class="text-base font-semibold text-slate-800 mb-6">Voortgang per thema</h2>
                 <div class="space-y-6">
-                    @foreach($periodStats as $stat)
-                        <div>
-                            <h4 class="text-lg font-semibold text-slate-800 mb-3">{{ $stat['period']->label }}</h4>
+                    @foreach($themeStats as $stat)
+                        <a href="{{ route('teacher.themes.show', $stat['theme']) }}" class="block group">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-1 h-6 rounded flex-shrink-0" style="background-color: {{ $stat['theme']->color }}"></div>
+                                <h4 class="text-sm font-semibold text-slate-800 group-hover:text-slate-900">
+                                    {{ $stat['theme']->code }}. {{ $stat['theme']->name }}
+                                </h4>
+                            </div>
                             @if($stat['total'] > 0)
                                 <div class="space-y-2">
                                     <div class="flex gap-1 h-8 rounded-lg overflow-hidden">
@@ -153,64 +226,8 @@
                             @else
                                 <div class="text-sm text-slate-400">Geen data</div>
                             @endif
-                        </div>
+                        </a>
                     @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- Voortgang per thema --}}
-        @if($themeStats->isNotEmpty())
-            <div>
-                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                    <h3 class="text-xl font-bold text-slate-900 mb-6">Voortgang per Thema</h3>
-                    <div class="space-y-6">
-                        @foreach($themeStats as $stat)
-                            <a href="{{ route('teacher.themes.show', $stat['theme']) }}" class="block group">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="w-1 h-6 rounded flex-shrink-0" style="background-color: {{ $stat['theme']->color }}"></div>
-                                    <h4 class="text-lg font-semibold text-slate-800 group-hover:text-slate-900">
-                                        {{ $stat['theme']->code }}. {{ $stat['theme']->name }}
-                                    </h4>
-                                </div>
-                                @if($stat['total'] > 0)
-                                    <div class="space-y-2">
-                                        <div class="flex gap-1 h-8 rounded-lg overflow-hidden">
-                                            @if($stat['sufficient'] > 0)
-                                                <div class="bg-emerald-500 flex items-center justify-center text-white text-xs font-medium"
-                                                     style="width: {{ $stat['pct_sufficient'] }}%">
-                                                    {{ $stat['sufficient'] }}
-                                                </div>
-                                            @endif
-                                            @if($stat['attention'] > 0)
-                                                <div class="bg-amber-500 flex items-center justify-center text-white text-xs font-medium"
-                                                     style="width: {{ $stat['pct_attention'] }}%">
-                                                    {{ $stat['attention'] }}
-                                                </div>
-                                            @endif
-                                            @if($stat['insufficient'] > 0)
-                                                <div class="bg-rose-500 flex items-center justify-center text-white text-xs font-medium"
-                                                     style="width: {{ $stat['pct_insufficient'] }}%">
-                                                    {{ $stat['insufficient'] }}
-                                                </div>
-                                            @endif
-                                            @php $pctNone = max(0, 100 - $stat['pct_sufficient'] - $stat['pct_attention'] - $stat['pct_insufficient']); @endphp
-                                            @if($pctNone > 0)
-                                                <div class="bg-slate-200 h-full flex-1"></div>
-                                            @endif
-                                        </div>
-                                        <div class="flex justify-between text-xs text-slate-600">
-                                            <span>🟢 {{ $stat['sufficient'] }} Voldoende ({{ $stat['pct_sufficient'] }}%)</span>
-                                            <span>🟠 {{ $stat['attention'] }} Aandacht ({{ $stat['pct_attention'] }}%)</span>
-                                            <span>🔴 {{ $stat['insufficient'] }} Onvoldoende ({{ $stat['pct_insufficient'] }}%)</span>
-                                        </div>
-                                    </div>
-                                @else
-                                    <div class="text-sm text-slate-400">Geen data</div>
-                                @endif
-                            </a>
-                        @endforeach
-                    </div>
                 </div>
             </div>
         @endif
