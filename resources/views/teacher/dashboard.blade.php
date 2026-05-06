@@ -196,11 +196,33 @@
             </div>
         </div>
 
-        {{-- Voortgang per Thema (altijd zichtbaar) --}}
+        {{-- Voortgang per Thema (standaard ingeklapt) --}}
         @if($themeStats->isNotEmpty())
-            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <h2 class="text-base font-semibold text-slate-800 mb-6">Voortgang per thema</h2>
-                <div class="space-y-6">
+            <div x-data="{ open: false }" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+
+                {{-- Klikbare header — altijd zichtbaar --}}
+                <button @click="open = !open"
+                        class="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-base font-semibold text-slate-800">Voortgang per thema</h2>
+                        <span x-show="!open" class="text-xs text-slate-400 font-normal">Klik om uit te vouwen</span>
+                    </div>
+                    <svg :class="{ 'rotate-180': open }"
+                         class="w-5 h-5 text-slate-400 transition-transform duration-200 flex-shrink-0"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                {{-- Inhoud — standaard verborgen --}}
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="border-t border-slate-200 px-6 py-6 space-y-6">
                     @foreach($themeStats as $stat)
                         <a href="{{ route('teacher.themes.show', $stat['theme']) }}" class="block group">
                             <div class="flex items-center gap-2 mb-3">
