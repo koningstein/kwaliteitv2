@@ -128,6 +128,69 @@
             </div>
         </div>
 
+        {{-- Mijn actiepunten (alleen voor medewerkers) --}}
+        @if($isMedewerker && $myActionPoints->isNotEmpty())
+            <div>
+                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Mijn actiepunten</h2>
+                <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="text-left px-5 py-3 font-semibold text-slate-600">Omschrijving</th>
+                                <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden sm:table-cell">Thema / Criterium</th>
+                                <th class="text-left px-5 py-3 font-semibold text-slate-600">Status</th>
+                                <th class="text-left px-5 py-3 font-semibold text-slate-600">Startdatum</th>
+                                <th class="text-left px-5 py-3 font-semibold text-slate-600">Einddatum</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach($myActionPoints as $ap)
+                                @php
+                                    $statusColors = [
+                                        'Niet gestart'  => 'bg-slate-100 text-slate-600',
+                                        'Op schema'     => 'bg-blue-100 text-blue-700',
+                                        'Loopt achter'  => 'bg-amber-100 text-amber-700',
+                                        'Uitgesteld'    => 'bg-orange-100 text-orange-700',
+                                        'Afgerond'      => 'bg-emerald-100 text-emerald-700',
+                                    ];
+                                    $statusClass = $statusColors[$ap->status?->name] ?? 'bg-slate-100 text-slate-600';
+                                    $themeRoute  = $ap->criterion?->standard?->theme
+                                        ? route('teacher.themes.show', $ap->criterion->standard->theme)
+                                        : null;
+                                @endphp
+                                <tr class="hover:bg-slate-50 transition-colors {{ $themeRoute ? 'cursor-pointer' : '' }}"
+                                    @if($themeRoute) onclick="window.location='{{ $themeRoute }}'" @endif>
+                                    <td class="px-5 py-3 text-slate-800 font-medium">
+                                        {{ Str::limit($ap->description, 80) }}
+                                    </td>
+                                    <td class="px-5 py-3 text-slate-500 hidden sm:table-cell">
+                                        @if($ap->criterion?->standard?->theme)
+                                            <span class="font-medium text-slate-700">{{ $ap->criterion->standard->theme->code }}</span>
+                                            &middot;
+                                            {{ $ap->criterion->standard->theme->name }}
+                                        @else
+                                            <span class="text-slate-300">—</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-3">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
+                                            {{ $ap->status?->name ?? 'Onbekend' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-5 py-3 text-slate-500">
+                                        {{ $ap->start_date ? \Carbon\Carbon::parse($ap->start_date)->format('d-m-Y') : '—' }}
+                                    </td>
+                                    <td class="px-5 py-3 text-slate-500">
+                                        {{ $ap->end_date ? \Carbon\Carbon::parse($ap->end_date)->format('d-m-Y') : '—' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
         {{-- Voortgang per Jaar (standaard ingeklapt) --}}
         <div x-data="{ open: false }" class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
 

@@ -7,8 +7,8 @@
             <p class="mt-1 text-sm text-slate-500">Overzicht van alle actiepunten</p>
         </div>
 
-        @if($teams->isEmpty() && !$selectedUser)
-            {{-- Geen teams, geen medewerker-view --}}
+        @if($teams->isEmpty())
+            {{-- Geen teams --}}
             <div class="bg-white border-2 border-slate-200 rounded-xl p-12 text-center">
                 <svg class="w-10 h-10 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -58,12 +58,38 @@
                         $c = $colorMap[$status->name] ?? $colorMap['Niet gestart'];
                         $isActive = (string)$filter === (string)$status->id;
                     @endphp
-                    <a href="{{ route('teacher.action-points.index', array_filter(['team' => $activeTeam?->id, 'user' => $selectedUser?->id, 'filter' => $status->id])) }}"
+                    <a href="{{ route('teacher.action-points.index', array_filter(['team' => $activeTeam?->id, 'user' => $selectedUser?->id, 'filter' => $status->id, 'mine' => $mineOnly ? 1 : null])) }}"
                        class="px-4 py-2 rounded-lg text-sm font-medium border transition-colors
                               {{ $isActive ? $c['active'] : 'bg-white '.$c['idle'] }}">
                         {{ $status->name }}
                     </a>
                 @endforeach
+
+                {{-- Mijn actiepunten toggle (alleen voor medewerkers) --}}
+                @if($isMedewerker)
+                    <div class="ml-auto">
+                        @if($mineOnly)
+                            <a href="{{ route('teacher.action-points.index', array_filter(['team' => $activeTeam?->id, 'filter' => $filter !== 'all' ? $filter : null])) }}"
+                               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Mijn actiepunten
+                                <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </a>
+                        @else
+                            <a href="{{ route('teacher.action-points.index', array_filter(['team' => $activeTeam?->id, 'filter' => $filter !== 'all' ? $filter : null, 'mine' => 1])) }}"
+                               class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-white border border-indigo-300 text-indigo-700 hover:bg-indigo-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                                Mijn actiepunten
+                            </a>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             {{-- Gebruikersfilter dropdown --}}

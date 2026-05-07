@@ -46,6 +46,8 @@ class ActionPointManager extends Component
 
     public array $expandedEvaluations = [];
 
+    public bool $isMedewerker = false;
+
     private function teamUsers()
     {
         if (! $this->teamId) {
@@ -59,8 +61,12 @@ class ActionPointManager extends Component
 
     public function mount(Criterion $criterion, ?int $teamId = null): void
     {
-        $this->criterionId = $criterion->id;
-        $this->teamId = $teamId;
+        $this->criterionId  = $criterion->id;
+        $this->teamId       = $teamId;
+
+        $user = auth()->user();
+        $this->isMedewerker = $user?->hasPermissionTo('edit-own-action-point-status')
+                           || $user?->hasPermissionTo('edit-own-action-point-dates');
     }
 
     // ── Nieuw actiepunt ─────────────────────────────────────────────
@@ -219,10 +225,14 @@ class ActionPointManager extends Component
     public function render()
     {
         $criterion = Criterion::with([
-            // Actiepunten gefilterd op actief team
-            'actionPoints' => fn ($q) => $this->teamId
-                ? $q->where('team_id', $this->teamId)
-                : $q,
+            // Actiepunten gefilterd: medewerker → eigen user_id, anderen → team_id
+            'actionPoints' => function ($q) {
+                if ($this->isMedewerker) {
+                    $q->where('user_id', auth()->id());
+                } elseif ($this->teamId) {
+                    $q->where('team_id', $this->teamId);
+                }
+            },
             'actionPoints.status',
             'actionPoints.user',
             'actionPoints.updater',

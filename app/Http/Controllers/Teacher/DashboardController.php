@@ -27,6 +27,8 @@ class DashboardController extends Controller implements HasMiddleware
     {
         $user           = auth()->user();
         $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
+        $isMedewerker   = $user?->hasPermissionTo('edit-own-action-point-status')
+                       || $user?->hasPermissionTo('edit-own-action-point-dates');
 
         // Beschikbare teams ophalen — zelfde logica als TeamController
         if ($isGlobalViewer) {
@@ -144,6 +146,14 @@ class DashboardController extends Controller implements HasMiddleware
             ];
         })->filter(fn ($stat) => $stat['total'] > 0)->values();
 
+        // Persoonlijke actiepunten voor medewerkers
+        $myActionPoints = $isMedewerker
+            ? ActionPoint::with(['status', 'criterion.standard.theme'])
+                ->where('user_id', $user->id)
+                ->orderByRaw('end_date IS NULL, end_date ASC')
+                ->get()
+            : collect();
+
         return view('teacher.dashboard', [
             'teams'             => $teams,
             'activeTeam'        => $activeTeam,
@@ -151,6 +161,8 @@ class DashboardController extends Controller implements HasMiddleware
             'totalActionPoints' => $totalActionPoints,
             'periodStats'       => $periodStats,
             'themeStats'        => $themeStats,
+            'isMedewerker'      => $isMedewerker,
+            'myActionPoints'    => $myActionPoints,
         ]);
     }
 

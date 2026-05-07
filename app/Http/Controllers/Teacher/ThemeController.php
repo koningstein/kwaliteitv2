@@ -30,21 +30,29 @@ class ThemeController extends Controller implements HasMiddleware
 
     public function show(Theme $theme)
     {
-        $user  = auth()->user();
-        $seeAll = $user?->hasPermissionTo('view-all-action-points');
+        $user         = auth()->user();
+        $seeAll       = $user?->hasPermissionTo('view-all-action-points');
+        $isMedewerker = $user?->hasPermissionTo('edit-own-action-point-status')
+                     || $user?->hasPermissionTo('edit-own-action-point-dates');
 
-        // Bepaal beschikbare teams voor deze gebruiker
-        $teams = $user?->managedTeams->isNotEmpty()
-            ? $user->managedTeams
-            : $user?->teams;
+        if ($isMedewerker) {
+            // Medewerker heeft geen team-tabs; ziet eigen actiepunten via user_id
+            $teams      = collect();
+            $activeTeam = null;
+            $teamId     = null;
+        } else {
+            // Bepaal beschikbare teams voor deze gebruiker
+            $managed = $user?->managedTeams;
+            $teams   = $managed?->isNotEmpty() ? $managed : $user?->teams;
 
-        // Bepaal actief team via ?team= param, of eerste team als fallback
-        $requestedTeamId = request()->query('team');
-        $activeTeam = $requestedTeamId
-            ? $teams?->firstWhere('id', $requestedTeamId)
-            : null;
-        $activeTeam = $activeTeam ?? $teams?->first();
-        $teamId = $seeAll ? null : $activeTeam?->id;
+            // Bepaal actief team via ?team= param, of eerste team als fallback
+            $requestedTeamId = request()->query('team');
+            $activeTeam = $requestedTeamId
+                ? $teams?->firstWhere('id', $requestedTeamId)
+                : null;
+            $activeTeam = $activeTeam ?? $teams?->first();
+            $teamId     = $seeAll ? null : $activeTeam?->id;
+        }
 
         $periods = ReportingPeriod::orderBy('sort_order')->get();
 
@@ -53,24 +61,31 @@ class ThemeController extends Controller implements HasMiddleware
             'standards.theme',
             'standards.criteria'               => fn ($q) => $q->orderBy('number'),
             'standards.criteria.indicators'    => fn ($q) => $q->orderBy('sort_order'),
+            // Scores zijn team-gebonden — altijd tonen, gefilterd op team indien van toepassing
             'standards.criteria.scores'        => fn ($q) => $teamId
                 ? $q->where('team_id', $teamId)
                 : $q,
             'standards.criteria.scores.reportingPeriod',
-            'standards.criteria.actionPoints'  => fn ($q) => $teamId
-                ? $q->where('team_id', $teamId)
-                : $q,
+            // Actiepunten: medewerker ziet alleen eigen, anderen gefilterd op team
+            'standards.criteria.actionPoints'  => function ($q) use ($isMedewerker, $teamId, $user) {
+                if ($isMedewerker) {
+                    $q->where('user_id', $user->id);
+                } elseif ($teamId) {
+                    $q->where('team_id', $teamId);
+                }
+            },
             'standards.criteria.actionPoints.status',
             'standards.criteria.actionPoints.user',
             'standards.criteria.actionPoints.evaluations',
         ]);
 
         return view('teacher.themes.show', [
-            'theme'      => $theme,
-            'periods'    => $periods,
-            'teams'      => $teams,
-            'activeTeam' => $activeTeam,
-            'teamId'     => $teamId,
+            'theme'        => $theme,
+            'periods'      => $periods,
+            'teams'        => $teams,
+            'activeTeam'   => $activeTeam,
+            'teamId'       => $teamId,
+            'isMedewerker' => $isMedewerker,
         ]);
     }
 }
