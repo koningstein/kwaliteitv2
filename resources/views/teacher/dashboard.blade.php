@@ -131,7 +131,7 @@
         </div>
 
         {{-- Mijn actiepunten (alleen voor medewerkers) --}}
-        @if($isMedewerker && $myActionPoints->isNotEmpty())
+        @if($myActionPoints->isNotEmpty())
             <div>
                 <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Mijn actiepunten</h2>
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">

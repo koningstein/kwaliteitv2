@@ -146,13 +146,11 @@ class DashboardController extends Controller implements HasMiddleware
             ];
         })->filter(fn ($stat) => $stat['total'] > 0)->values();
 
-        // Persoonlijke actiepunten voor medewerkers
-        $myActionPoints = $isMedewerker
-            ? ActionPoint::with(['status', 'criterion.standard.theme'])
-                ->where('user_id', $user->id)
-                ->orderByRaw('end_date IS NULL, end_date ASC')
-                ->get()
-            : collect();
+        // Persoonlijke actiepunten — voor iedereen met toegewezen actiepunten
+        $myActionPoints = ActionPoint::with(['status', 'criterion.standard.theme'])
+            ->where('user_id', $user->id)
+            ->orderByRaw('end_date IS NULL, end_date ASC')
+            ->get();
 
         return view('teacher.dashboard', [
             'teams'             => $teams,
