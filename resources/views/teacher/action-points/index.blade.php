@@ -170,7 +170,7 @@
                             </svg>
                             <span>Criterium {{ $ap->criterion->number }}</span>
                             <span class="ml-1">
-                                <a href="{{ route('teacher.themes.show', $ap->criterion->standard->theme) }}"
+                                <a href="{{ route('teacher.themes.show', $ap->criterion->standard->theme) . '?open_criterion=' . $ap->criterion_id }}"
                                    class="text-blue-500 hover:text-blue-700 underline">Bekijken</a>
                             </span>
                         @endif
