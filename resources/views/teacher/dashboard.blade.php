@@ -20,7 +20,8 @@
             <div class="text-sm font-semibold text-slate-700">{{ $activeTeam->name }}</div>
         @endif
 
-        {{-- Export buttons --}}
+        {{-- Export buttons (alleen voor onderwijsleider, kwaliteitszorg en ok_medewerker) --}}
+        @if(auth()->user()->hasPermissionTo('export-reports'))
         <div class="flex items-center gap-3">
             <a href="{{ route('teacher.dashboard.export-pdf', array_filter(['team' => $activeTeam?->id])) }}"
                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-sm">
@@ -46,6 +47,7 @@
                 Exporteer naar Excel
             </button>
         </div>
+        @endif
 
         {{-- KPI-kaarten actiepunten --}}
         <div>

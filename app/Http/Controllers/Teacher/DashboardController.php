@@ -168,6 +168,8 @@ class DashboardController extends Controller implements HasMiddleware
 
     public function exportPdf(Request $request)
     {
+        abort_unless(auth()->user()?->hasPermissionTo('export-reports'), 403);
+
         $user           = auth()->user();
         $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
 
