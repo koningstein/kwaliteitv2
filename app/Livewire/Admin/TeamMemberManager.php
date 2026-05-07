@@ -80,9 +80,9 @@ class TeamMemberManager extends Component
 
         return view('livewire.admin.team-member-manager', [
             'searchResults' => $searchResults,
-            'locations' => Location::orderBy('name')->get(),
-            'members' => $this->team->users,
-            'leaders' => $this->team->leaders,
+            'locations'     => Location::orderBy('name')->get(),
+            'members'       => $this->team->users->load('roles'),
+            'leaders'       => $this->team->leaders->load('roles'),
         ]);
     }
 }

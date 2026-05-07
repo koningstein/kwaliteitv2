@@ -18,9 +18,14 @@
                 <div class="p-4">
                     <ul class="space-y-2">
                         @forelse($members as $member)
+                            @php
+                                $rolKey  = $member->roles->first()?->name;
+                                $rolInfo = $rolLabels[$rolKey] ?? ['label' => $rolKey ?? '—', 'color' => 'bg-zinc-100 text-zinc-600 ring-zinc-500/20'];
+                            @endphp
                             <li class="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2 dark:border-zinc-700">
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2">
                                     <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $member->name }}</p>
+                                    <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset {{ $rolInfo['color'] }}">{{ $rolInfo['label'] }}</span>
                                     @foreach($member->locations as $loc)
                                         <span class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30">{{ $loc->abbreviation }}</span>
                                     @endforeach
@@ -45,9 +50,14 @@
                 <div class="p-4">
                     <ul class="space-y-2">
                         @forelse($leaders as $leader)
+                            @php
+                                $rolKey  = $leader->roles->first()?->name;
+                                $rolInfo = $rolLabels[$rolKey] ?? ['label' => $rolKey ?? '—', 'color' => 'bg-zinc-100 text-zinc-600 ring-zinc-500/20'];
+                            @endphp
                             <li class="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2 dark:border-zinc-700">
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2">
                                     <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $leader->name }}</p>
+                                    <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset {{ $rolInfo['color'] }}">{{ $rolInfo['label'] }}</span>
                                     @foreach($leader->locations as $loc)
                                         <span class="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30">{{ $loc->abbreviation }}</span>
                                     @endforeach

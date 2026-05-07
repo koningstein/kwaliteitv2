@@ -24,6 +24,9 @@
 
                 @role('ok_medewerker')
                 <flux:sidebar.group :heading="__('Beheer')" class="grid">
+                    <flux:sidebar.item icon="user-group" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.*')" wire:navigate>
+                        {{ __('Gebruikers') }}
+                    </flux:sidebar.item>
                     <flux:sidebar.item icon="users" :href="route('admin.teams.index')" :current="request()->routeIs('admin.teams.*')" wire:navigate>
                         {{ __('Teams') }}
                     </flux:sidebar.item>

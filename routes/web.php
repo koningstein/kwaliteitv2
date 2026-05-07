@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ReportingPeriodController;
 use App\Http\Controllers\Admin\StandardController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\ThemeController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Teacher\ActionPointController as TeacherActionPointController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
 use App\Http\Controllers\Teacher\TeamController as TeacherTeamController;
@@ -26,6 +27,7 @@ Route::view('dashboard', 'dashboard')
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified', 'role:ok_medewerker'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', UserController::class)->except(['show']);
     Route::resource('teams', TeamController::class);
     Route::get('teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
     Route::resource('locations', LocationController::class)->except(['show']);
