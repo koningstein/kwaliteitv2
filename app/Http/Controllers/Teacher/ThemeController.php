@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\Criterion;
 use App\Models\ReportingPeriod;
 use App\Models\Theme;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -79,13 +80,21 @@ class ThemeController extends Controller implements HasMiddleware
             'standards.criteria.actionPoints.evaluations',
         ]);
 
+        // open_criterion: automatisch de juiste standaard + criterium openvouwen
+        $openCriterionId = (int) request()->query('open_criterion') ?: null;
+        $openStandardId  = $openCriterionId
+            ? Criterion::find($openCriterionId)?->standard_id
+            : null;
+
         return view('teacher.themes.show', [
-            'theme'        => $theme,
-            'periods'      => $periods,
-            'teams'        => $teams,
-            'activeTeam'   => $activeTeam,
-            'teamId'       => $teamId,
-            'isMedewerker' => $isMedewerker,
+            'theme'           => $theme,
+            'periods'         => $periods,
+            'teams'           => $teams,
+            'activeTeam'      => $activeTeam,
+            'teamId'          => $teamId,
+            'isMedewerker'    => $isMedewerker,
+            'openCriterionId' => $openCriterionId,
+            'openStandardId'  => $openStandardId,
         ]);
     }
 }

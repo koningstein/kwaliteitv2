@@ -155,7 +155,7 @@
                                     ];
                                     $statusClass = $statusColors[$ap->status?->name] ?? 'bg-slate-100 text-slate-600';
                                     $themeRoute  = $ap->criterion?->standard?->theme
-                                        ? route('teacher.themes.show', $ap->criterion->standard->theme)
+                                        ? route('teacher.themes.show', $ap->criterion->standard->theme) . '?open_criterion=' . $ap->criterion_id
                                         : null;
                                 @endphp
                                 <tr class="hover:bg-slate-50 transition-colors {{ $themeRoute ? 'cursor-pointer' : '' }}"

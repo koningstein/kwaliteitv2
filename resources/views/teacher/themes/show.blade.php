@@ -73,7 +73,9 @@
                 :standard="$standard"
                 :periods="$periods"
                 :teamId="$teamId ?? null"
-                :key="'sc-'.$standard->id.'-'.($teamId ?? 0)"
+                :openCriterionId="$openCriterionId ?? null"
+                :openStandardId="$openStandardId ?? null"
+                :key="'sc-'.$standard->id.'-'.($teamId ?? 0).'-'.($openCriterionId ?? 0)"
             />
         @empty
             <div class="bg-white border border-slate-200 rounded-xl p-12 text-center">

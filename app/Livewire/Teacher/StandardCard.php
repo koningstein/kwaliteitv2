@@ -76,11 +76,21 @@ class StandardCard extends Component
 
     // ── Mount ────────────────────────────────────────────────────────
 
-    public function mount(Standard $standard, $periods, ?int $teamId = null): void
+    public function mount(Standard $standard, $periods, ?int $teamId = null, ?int $openCriterionId = null, ?int $openStandardId = null): void
     {
         $this->standardId = $standard->id;
-        $this->periods = $periods;
-        $this->teamId = $teamId;
+        $this->periods    = $periods;
+        $this->teamId     = $teamId;
+
+        // Vouw de standaard automatisch open als dit de gevraagde standaard is
+        if ($openStandardId && $openStandardId === $standard->id) {
+            $this->isOpen = true;
+
+            // Vouw ook het gevraagde criterium open
+            if ($openCriterionId) {
+                $this->openCriteria[$openCriterionId] = true;
+            }
+        }
 
         foreach ($standard->criteria as $criterion) {
             $this->explanations[$criterion->id] = $criterion->explanation ?? '';
