@@ -30,11 +30,22 @@ class ThemeController extends Controller implements HasMiddleware
 
     public function show(Theme $theme)
     {
-        $user   = auth()->user();
-        $teamId = $user?->teams->first()?->id;
+        $user  = auth()->user();
+        $seeAll = $user?->hasPermissionTo('view-all-action-points');
 
-        // O&K en directie zien alle periodes; anderen zien ook alle periodes
-        // maar de scores/actiepunten worden per team gefilterd
+        // Bepaal beschikbare teams voor deze gebruiker
+        $teams = $user?->managedTeams->isNotEmpty()
+            ? $user->managedTeams
+            : $user?->teams;
+
+        // Bepaal actief team via ?team= param, of eerste team als fallback
+        $requestedTeamId = request()->query('team');
+        $activeTeam = $requestedTeamId
+            ? $teams?->firstWhere('id', $requestedTeamId)
+            : null;
+        $activeTeam = $activeTeam ?? $teams?->first();
+        $teamId = $seeAll ? null : $activeTeam?->id;
+
         $periods = ReportingPeriod::orderBy('sort_order')->get();
 
         $theme->load([
@@ -42,13 +53,11 @@ class ThemeController extends Controller implements HasMiddleware
             'standards.theme',
             'standards.criteria'               => fn ($q) => $q->orderBy('number'),
             'standards.criteria.indicators'    => fn ($q) => $q->orderBy('sort_order'),
-            // Scores gefilterd op eigen team (O&K/directie ziet alles)
-            'standards.criteria.scores'        => fn ($q) => ($teamId && !$user->hasRole(['ok_medewerker', 'directie']))
+            'standards.criteria.scores'        => fn ($q) => $teamId
                 ? $q->where('team_id', $teamId)
                 : $q,
             'standards.criteria.scores.reportingPeriod',
-            // Actiepunten gefilterd op eigen team
-            'standards.criteria.actionPoints'  => fn ($q) => ($teamId && !$user->hasRole(['ok_medewerker', 'directie']))
+            'standards.criteria.actionPoints'  => fn ($q) => $teamId
                 ? $q->where('team_id', $teamId)
                 : $q,
             'standards.criteria.actionPoints.status',
@@ -57,8 +66,11 @@ class ThemeController extends Controller implements HasMiddleware
         ]);
 
         return view('teacher.themes.show', [
-            'theme'   => $theme,
-            'periods' => $periods,
+            'theme'      => $theme,
+            'periods'    => $periods,
+            'teams'      => $teams,
+            'activeTeam' => $activeTeam,
+            'teamId'     => $teamId,
         ]);
     }
 }

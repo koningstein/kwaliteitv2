@@ -28,6 +28,10 @@ class PermissionUpdateSeeder extends Seeder
             $manageTeams,
             $viewAllActionPoints,
             Permission::firstOrCreate(['name' => 'manage-team-users']), // was al aanwezig maar niet toegekend aan ok_medewerker
+            Permission::firstOrCreate(['name' => 'create-action-points']),
+            Permission::firstOrCreate(['name' => 'edit-action-points']),
+            Permission::firstOrCreate(['name' => 'delete-action-points']),
+            Permission::firstOrCreate(['name' => 'edit-criteria-scores']),
         ]);
 
         // directie krijgt view-all-action-points
@@ -40,5 +44,9 @@ class PermissionUpdateSeeder extends Seeder
         $this->command->info('  + manage-teams → ok_medewerker');
         $this->command->info('  + view-all-action-points → ok_medewerker, directie');
         $this->command->info('  + manage-team-users → ok_medewerker');
+        $this->command->info('  + create-action-points → ok_medewerker');
+        $this->command->info('  + edit-action-points → ok_medewerker');
+        $this->command->info('  + delete-action-points → ok_medewerker');
+        $this->command->info('  + edit-criteria-scores → ok_medewerker');
     }
 }

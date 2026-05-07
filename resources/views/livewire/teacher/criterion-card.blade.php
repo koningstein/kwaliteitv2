@@ -131,7 +131,7 @@
 
                 {{-- Actiepunten --}}
                 <div class="pt-4 border-t border-slate-100">
-                    <livewire:teacher.action-point-manager :criterion="$criterion" :key="'apm-'.$criterion->id" />
+                    <livewire:teacher.action-point-manager :criterion="$criterion" :teamId="$teamId" :key="'apm-'.$criterion->id.'-'.($teamId ?? 0)" />
                 </div>
 
             </div>

@@ -16,6 +16,8 @@ class StandardCard extends Component
 {
     public int $standardId;
 
+    public ?int $teamId = null;
+
     public $periods;
 
     public bool $isOpen = false;
@@ -59,47 +61,35 @@ class StandardCard extends Component
     // ── Hulpfuncties voor team-scope ─────────────────────────────────
 
     /**
-     * Geeft het eerste team van de ingelogde gebruiker terug.
-     * Kwaliteitszorg heeft altijd precies 1 team.
-     */
-    private function userTeamId(): ?int
-    {
-        return auth()->user()?->teams->first()?->id;
-    }
-
-    /**
-     * Geeft de users terug die tot het eigen team behoren (voor de dropdowns).
+     * Geeft de users terug die tot het actieve team behoren (voor de dropdowns).
      */
     private function teamUsers()
     {
-        $teamId = $this->userTeamId();
-
-        if (! $teamId) {
+        if (! $this->teamId) {
             return User::orderBy('name')->get();
         }
 
-        return User::whereHas('teams', fn ($q) => $q->where('teams.id', $teamId))
+        return User::whereHas('teams', fn ($q) => $q->where('teams.id', $this->teamId))
             ->orderBy('name')
             ->get();
     }
 
     // ── Mount ────────────────────────────────────────────────────────
 
-    public function mount(Standard $standard, $periods): void
+    public function mount(Standard $standard, $periods, ?int $teamId = null): void
     {
         $this->standardId = $standard->id;
         $this->periods = $periods;
-
-        $teamId = $this->userTeamId();
+        $this->teamId = $teamId;
 
         foreach ($standard->criteria as $criterion) {
             $this->explanations[$criterion->id] = $criterion->explanation ?? '';
             $this->scores[$criterion->id] = [];
 
-            // Laad scores gefilterd op het eigen team
+            // Laad scores gefilterd op het actieve team
             $teamScores = $criterion->scores->when(
-                $teamId,
-                fn ($col) => $col->where('team_id', $teamId)
+                $this->teamId,
+                fn ($col) => $col->where('team_id', $this->teamId)
             );
 
             foreach ($teamScores as $score) {
@@ -128,13 +118,11 @@ class StandardCard extends Component
     {
         Gate::authorize('create', CriterionScore::class);
 
-        $teamId = $this->userTeamId();
-
         CriterionScore::updateOrCreate(
             [
                 'criterion_id' => $criterionId,
                 'reporting_period_id' => $periodId,
-                'team_id' => $teamId,
+                'team_id' => $this->teamId,
             ],
             [
                 'status' => $status,
@@ -200,7 +188,7 @@ class StandardCard extends Component
         ActionPoint::create([
             'criterion_id' => $this->showAddFormFor,
             'user_id' => $this->newUserId,
-            'team_id' => $this->userTeamId(),
+            'team_id' => $this->teamId,
             'action_point_status_id' => $defaultStatus?->id,
             'description' => $this->newDescription,
             'start_date' => $this->newStartDate,
@@ -312,19 +300,17 @@ class StandardCard extends Component
 
     public function render()
     {
-        $teamId = $this->userTeamId();
-
         $standard = Standard::with([
             'theme',
             'criteria' => fn ($q) => $q->orderBy('number'),
             'criteria.indicators' => fn ($q) => $q->orderBy('sort_order'),
-            // Scores gefilterd op eigen team
-            'criteria.scores' => fn ($q) => $teamId
-                ? $q->where('team_id', $teamId)
+            // Scores gefilterd op actief team
+            'criteria.scores' => fn ($q) => $this->teamId
+                ? $q->where('team_id', $this->teamId)
                 : $q,
-            // Actiepunten gefilterd op eigen team
-            'criteria.actionPoints' => fn ($q) => $teamId
-                ? $q->where('team_id', $teamId)
+            // Actiepunten gefilterd op actief team
+            'criteria.actionPoints' => fn ($q) => $this->teamId
+                ? $q->where('team_id', $this->teamId)
                 : $q,
             'criteria.actionPoints.status',
             'criteria.actionPoints.user',

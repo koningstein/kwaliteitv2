@@ -14,6 +14,8 @@ class ActionPointManager extends Component
 {
     public int $criterionId;
 
+    public ?int $teamId = null;
+
     public bool $showAddForm = false;
 
     public string $newDescription = '';
@@ -44,27 +46,21 @@ class ActionPointManager extends Component
 
     public array $expandedEvaluations = [];
 
-    private function userTeamId(): ?int
-    {
-        return auth()->user()?->teams->first()?->id;
-    }
-
     private function teamUsers()
     {
-        $teamId = $this->userTeamId();
-
-        if (! $teamId) {
+        if (! $this->teamId) {
             return User::orderBy('name')->get();
         }
 
-        return User::whereHas('teams', fn ($q) => $q->where('teams.id', $teamId))
+        return User::whereHas('teams', fn ($q) => $q->where('teams.id', $this->teamId))
             ->orderBy('name')
             ->get();
     }
 
-    public function mount(Criterion $criterion): void
+    public function mount(Criterion $criterion, ?int $teamId = null): void
     {
         $this->criterionId = $criterion->id;
+        $this->teamId = $teamId;
     }
 
     // ── Nieuw actiepunt ─────────────────────────────────────────────
@@ -91,7 +87,7 @@ class ActionPointManager extends Component
         ActionPoint::create([
             'criterion_id' => $this->criterionId,
             'user_id' => $this->newUserId,
-            'team_id' => $this->userTeamId(),
+            'team_id' => $this->teamId,
             'action_point_status_id' => $defaultStatus?->id,
             'description' => $this->newDescription,
             'start_date' => $this->newStartDate,
@@ -222,12 +218,10 @@ class ActionPointManager extends Component
 
     public function render()
     {
-        $teamId = $this->userTeamId();
-
         $criterion = Criterion::with([
-            // Actiepunten gefilterd op eigen team
-            'actionPoints' => fn ($q) => $teamId
-                ? $q->where('team_id', $teamId)
+            // Actiepunten gefilterd op actief team
+            'actionPoints' => fn ($q) => $this->teamId
+                ? $q->where('team_id', $this->teamId)
                 : $q,
             'actionPoints.status',
             'actionPoints.user',

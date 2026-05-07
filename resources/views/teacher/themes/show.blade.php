@@ -50,12 +50,30 @@
             </div>
         @endif
 
+        {{-- Team-tabs (alleen tonen bij meerdere teams) --}}
+        @if(isset($teams) && $teams->count() > 1)
+            <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+                @foreach($teams as $team)
+                    <a href="{{ route('teacher.themes.show', ['theme' => $theme->id, 'team' => $team->id]) }}"
+                       class="px-5 py-2 rounded-lg text-sm font-medium transition-all
+                              {{ $activeTeam?->id === $team->id
+                                  ? 'bg-white text-slate-900 shadow-sm'
+                                  : 'text-slate-500 hover:text-slate-700' }}">
+                        {{ $team->name }}
+                    </a>
+                @endforeach
+            </div>
+        @elseif(isset($activeTeam) && $activeTeam)
+            <div class="text-sm font-semibold text-slate-700">{{ $activeTeam->name }}</div>
+        @endif
+
         {{-- Standaarden — beginnen ingeklapt --}}
         @forelse($theme->standards as $standard)
             <livewire:teacher.standard-card
                 :standard="$standard"
                 :periods="$periods"
-                :key="'sc-'.$standard->id"
+                :teamId="$teamId ?? null"
+                :key="'sc-'.$standard->id.'-'.($teamId ?? 0)"
             />
         @empty
             <div class="bg-white border border-slate-200 rounded-xl p-12 text-center">

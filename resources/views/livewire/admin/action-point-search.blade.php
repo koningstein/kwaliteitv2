@@ -32,7 +32,7 @@
                             </div>
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-700 dark:text-zinc-300">
-                            {{ $actionPoint->team->name }}
+                            {{ $actionPoint->team?->name ?? '—' }}
                         </td>
                         <td class="whitespace-nowrap px-6 py-4">
                             <span class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 ring-1 ring-inset ring-zinc-600/20 dark:bg-zinc-700 dark:text-zinc-300 dark:ring-zinc-500/30">

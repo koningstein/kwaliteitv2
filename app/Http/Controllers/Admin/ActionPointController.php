@@ -9,7 +9,6 @@ use App\Models\ActionPoint;
 use App\Models\ActionPointStatus;
 use App\Models\Criterion;
 use App\Models\Team;
-use App\Models\User;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -30,10 +29,14 @@ class ActionPointController extends Controller implements HasMiddleware
     {
         $criteria = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
         $teams    = Team::orderBy('name')->get();
-        $users    = User::orderBy('name')->get();
         $statuses = ActionPointStatus::orderBy('name')->get();
 
-        return view('admin.action-points.create', compact('criteria', 'teams', 'users', 'statuses'));
+        // Gebruikers per team als JSON voor de dynamische dropdown
+        $usersByTeam = $teams->mapWithKeys(fn ($team) => [
+            $team->id => $team->users()->orderBy('name')->get(['users.id', 'users.name'])->toArray(),
+        ]);
+
+        return view('admin.action-points.create', compact('criteria', 'teams', 'statuses', 'usersByTeam'));
     }
 
     public function store(ActionPointStoreRequest $request)
@@ -48,10 +51,14 @@ class ActionPointController extends Controller implements HasMiddleware
     {
         $criteria = Criterion::with('standard.theme')->orderBy('standard_id')->orderBy('number')->get();
         $teams    = Team::orderBy('name')->get();
-        $users    = User::orderBy('name')->get();
         $statuses = ActionPointStatus::orderBy('name')->get();
 
-        return view('admin.action-points.edit', compact('actionPoint', 'criteria', 'teams', 'users', 'statuses'));
+        // Gebruikers per team als JSON voor de dynamische dropdown
+        $usersByTeam = $teams->mapWithKeys(fn ($team) => [
+            $team->id => $team->users()->orderBy('name')->get(['users.id', 'users.name'])->toArray(),
+        ]);
+
+        return view('admin.action-points.edit', compact('actionPoint', 'criteria', 'teams', 'statuses', 'usersByTeam'));
     }
 
     public function update(ActionPointUpdateRequest $request, ActionPoint $actionPoint)
