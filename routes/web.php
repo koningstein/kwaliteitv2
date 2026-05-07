@@ -30,7 +30,11 @@ Route::middleware(['auth', 'verified', 'role:ok_medewerker'])->prefix('admin')->
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('teams', TeamController::class);
     Route::get('teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
-    Route::resource('locations', LocationController::class)->except(['show']);
+    Route::resource('locations', LocationController::class);
+    Route::post('locations/{location}/teams/attach', [LocationController::class, 'attachTeam'])->name('locations.teams.attach');
+    Route::delete('locations/{location}/teams/{team}/detach', [LocationController::class, 'detachTeam'])->name('locations.teams.detach');
+    Route::post('locations/{location}/users/attach', [LocationController::class, 'attachUser'])->name('locations.users.attach');
+    Route::delete('locations/{location}/users/{user}/detach', [LocationController::class, 'detachUser'])->name('locations.users.detach');
     Route::resource('themes', ThemeController::class)->except(['show']);
     Route::resource('standards', StandardController::class)->except(['show']);
     Route::resource('criteria', CriterionController::class)->except(['show']);

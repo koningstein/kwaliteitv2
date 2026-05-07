@@ -1,4 +1,13 @@
 <div class="flex flex-col gap-4">
+@php
+    $rolLabels = [
+        'ok_medewerker'   => ['label' => 'O&K',             'color' => 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-900/30 dark:text-purple-300 dark:ring-purple-500/30'],
+        'kwaliteitszorg'  => ['label' => 'Kwaliteitszorg',  'color' => 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30'],
+        'onderwijsleider' => ['label' => 'Onderwijsleider', 'color' => 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-500/30'],
+        'medewerker'      => ['label' => 'Medewerker',      'color' => 'bg-zinc-100 text-zinc-600 ring-zinc-500/20 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-500/30'],
+        'directie'        => ['label' => 'Directie',        'color' => 'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-900/30 dark:text-orange-300 dark:ring-orange-500/30'],
+    ];
+@endphp
     {{-- Succesmelding binnen de Livewire component --}}
     @if (session()->has('message'))
         <div class="rounded-lg bg-green-100 p-4 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-200 border border-green-200 dark:border-green-800">
@@ -89,10 +98,17 @@
                 </div>
 
                 <div class="space-y-2">
-                    @foreach($searchResults as $user)
+                    @forelse($searchResults as $user)
+                        @php
+                            $rolKey  = $user->roles->first()?->name;
+                            $rolInfo = $rolLabels[$rolKey] ?? ['label' => $rolKey ?? '—', 'color' => 'bg-zinc-100 text-zinc-600 ring-zinc-500/20'];
+                        @endphp
                         <div class="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2 dark:border-zinc-700">
                             <div class="flex items-center gap-2">
                                 <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $user->name }}</p>
+                                <span class="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ring-1 ring-inset {{ $rolInfo['color'] }}">
+                                    {{ $rolInfo['label'] }}
+                                </span>
                                 @foreach($user->locations as $loc)
                                     <span class="inline-flex items-center rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400">{{ $loc->abbreviation }}</span>
                                 @endforeach
@@ -106,8 +122,16 @@
                                 </button>
                             </div>
                         </div>
-                    @endforeach
+                    @empty
+                        <p class="text-center text-sm text-zinc-500 dark:text-zinc-400">Geen personen gevonden.</p>
+                    @endforelse
                 </div>
+
+                @if($searchResults->hasPages())
+                    <div class="mt-4">
+                        {{ $searchResults->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

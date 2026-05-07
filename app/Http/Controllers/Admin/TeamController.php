@@ -7,9 +7,24 @@ use App\Http\Requests\TeamStoreRequest;
 use App\Http\Requests\TeamUpdateRequest;
 use App\Models\Location;
 use App\Models\Team;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
 
-class TeamController extends Controller
+class TeamController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(PermissionMiddleware::using('manage-teams'), only: [
+                'index', 'create', 'store', 'show', 'edit', 'update', 'destroy',
+            ]),
+            new Middleware(PermissionMiddleware::using('manage-team-users'), only: [
+                'members',
+            ]),
+        ];
+    }
+
     public function index()
     {
         return view('admin.teams.index');

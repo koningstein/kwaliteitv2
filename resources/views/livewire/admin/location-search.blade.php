@@ -28,7 +28,11 @@
                             </span>
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                            {{ $location->name }}
+                            <a href="{{ route('admin.locations.show', $location) }}"
+                               class="hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+                               wire:navigate>
+                                {{ $location->name }}
+                            </a>
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
                             {{ $location->teams_count }}
@@ -38,6 +42,9 @@
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
+                                <a href="{{ route('admin.locations.show', $location) }}" class="inline-flex items-center rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30 dark:hover:bg-blue-900/50" wire:navigate>
+                                    Details
+                                </a>
                                 <a href="{{ route('admin.locations.edit', $location) }}" class="inline-flex items-center rounded-md bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20 hover:bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-300 dark:ring-yellow-500/30 dark:hover:bg-yellow-900/50" wire:navigate>
                                     Bewerken
                                 </a>
