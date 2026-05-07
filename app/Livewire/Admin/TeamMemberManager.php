@@ -6,9 +6,12 @@ use App\Models\Location;
 use App\Models\Team;
 use App\Models\User;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class TeamMemberManager extends Component
 {
+    use WithPagination;
+
     public Team $team;
     public string $search = '';
     public string $locationFilter = '';
@@ -18,8 +21,20 @@ class TeamMemberManager extends Component
         $this->team = $team;
     }
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedLocationFilter(): void
+    {
+        $this->resetPage();
+    }
+
     public function addMember(int $userId): void
     {
+        abort_unless(auth()->user()->hasPermissionTo('manage-team-users'), 403);
+
         $user = User::findOrFail($userId);
         if (!$this->team->users()->where('user_id', $userId)->exists()) {
             $this->team->users()->attach($userId);
@@ -30,6 +45,8 @@ class TeamMemberManager extends Component
 
     public function removeMember(int $userId): void
     {
+        abort_unless(auth()->user()->hasPermissionTo('manage-team-users'), 403);
+
         $user = User::findOrFail($userId);
         $this->team->users()->detach($userId);
         session()->flash('message', "{$user->name} is verwijderd uit het team.");
@@ -38,6 +55,8 @@ class TeamMemberManager extends Component
 
     public function addLeader(int $userId): void
     {
+        abort_unless(auth()->user()->hasPermissionTo('manage-team-users'), 403);
+
         $user = User::findOrFail($userId);
         if (!$this->team->leaders()->where('user_id', $userId)->exists()) {
             $this->team->leaders()->attach($userId);
@@ -48,6 +67,8 @@ class TeamMemberManager extends Component
 
     public function removeLeader(int $userId): void
     {
+        abort_unless(auth()->user()->hasPermissionTo('manage-team-users'), 403);
+
         $user = User::findOrFail($userId);
         $this->team->leaders()->detach($userId);
         session()->flash('message', "{$user->name} is verwijderd als teamleider.");
@@ -60,29 +81,25 @@ class TeamMemberManager extends Component
             ->merge($this->team->leaders->pluck('id'))
             ->unique();
 
-        $searchResults = collect();
-        if (strlen($this->search) >= 2 || $this->locationFilter !== '') {
-            $searchResults = User::query()
-                ->whereNotIn('id', $existingUserIds) // Verberg reeds gekoppelde personen
-                ->when(strlen($this->search) >= 2, function ($query) {
-                    $query->where('name', 'like', '%' . $this->search . '%');
-                })
-                ->when($this->locationFilter !== '', function ($query) {
-                    $query->whereHas('locations', function ($q) {
-                        $q->where('locations.id', $this->locationFilter);
-                    });
-                })
-                ->with('locations')
-                ->orderBy('name')
-                ->limit(20)
-                ->get();
-        }
+        $searchResults = User::query()
+            ->whereNotIn('id', $existingUserIds)
+            ->when(strlen($this->search) >= 2, function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->locationFilter !== '', function ($query) {
+                $query->whereHas('locations', function ($q) {
+                    $q->where('locations.id', $this->locationFilter);
+                });
+            })
+            ->with('locations', 'roles')
+            ->orderBy('name')
+            ->paginate(15);
 
         return view('livewire.admin.team-member-manager', [
             'searchResults' => $searchResults,
-            'locations' => Location::orderBy('name')->get(),
-            'members' => $this->team->users,
-            'leaders' => $this->team->leaders,
+            'locations'     => Location::orderBy('name')->get(),
+            'members'       => $this->team->users,
+            'leaders'       => $this->team->leaders,
         ]);
     }
 }
