@@ -275,7 +275,7 @@ class StandardCard extends Component
 
     public function saveEvaluation(): void
     {
-        Gate::authorize('create', Evaluation::class);
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
 
         $this->validate([
             'newEvaluationText' => 'required|string|max:2000',

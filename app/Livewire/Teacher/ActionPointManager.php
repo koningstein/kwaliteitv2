@@ -145,7 +145,7 @@ class ActionPointManager extends Component
         ]);
 
         if (trim($this->editEvaluationText) !== '') {
-            Gate::authorize('create', Evaluation::class);
+            abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
 
             Evaluation::create([
                 'action_point_id' => $this->editingId,
@@ -185,7 +185,7 @@ class ActionPointManager extends Component
 
     public function startEvaluation(int $id): void
     {
-        Gate::authorize('create', Evaluation::class);
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
 
         $this->evaluatingId = $id;
         $this->newEvaluationText = '';
@@ -193,7 +193,7 @@ class ActionPointManager extends Component
 
     public function saveEvaluation(): void
     {
-        Gate::authorize('create', Evaluation::class);
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
 
         $this->validate([
             'newEvaluationText' => 'required|string|max:2000',

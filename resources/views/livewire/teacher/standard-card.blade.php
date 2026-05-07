@@ -83,7 +83,7 @@
                                             <span class="w-8 h-8 rounded-full bg-emerald-500 {{ $current === 'sufficient' ? 'ring-4 ring-emerald-400 scale-110' : 'opacity-20' }}"></span>
                                             <span class="w-8 h-8 rounded-full bg-amber-500 {{ $current === 'attention' ? 'ring-4 ring-amber-400 scale-110' : 'opacity-20' }}"></span>
                                             <span class="w-8 h-8 rounded-full bg-rose-500 {{ $current === 'insufficient' ? 'ring-4 ring-rose-400 scale-110' : 'opacity-20' }}"></span>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
@@ -168,7 +168,7 @@
                                                 Actiepunt toevoegen
                                             </button>
                                         @endif
-                                    @endcan
+                                    @endif
                                 </div>
 
                                 {{-- Nieuw actiepunt formulier --}}
@@ -219,7 +219,7 @@
                                         </div>
                                     </div>
                                 @endif
-                                @endcan
+                                @endif
 
                                 {{-- Actiepunten lijst --}}
                                 @forelse($criterion->actionPoints as $ap)
@@ -294,7 +294,7 @@
                                                 </div>
                                                 </div>
                                             @endif
-                                        @endcan
+                                        @endif
                                         @if($editingActionPointId !== $ap->id)
                                             {{-- Weergave modus --}}
                                             <div class="p-4">
@@ -329,7 +329,7 @@
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                                                 </svg>
                                                             </button>
-                                                        @endcan
+                                                        @endif
                                                         @can('delete', $ap)
                                                             <button wire:click="deleteActionPoint({{ $ap->id }})"
                                                                 wire:confirm="Weet je zeker dat je dit actiepunt wilt verwijderen?"
@@ -338,7 +338,7 @@
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                                 </svg>
                                                             </button>
-                                                        @endcan
+                                                        @endif
                                                     </div>
                                                 </div>
 
@@ -348,7 +348,7 @@
                                                         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                                                             Evaluaties ({{ $ap->evaluations->count() }})
                                                         </span>
-                                                        @can('create', \App\Models\Evaluation::class)
+                                                        @if(auth()->user()->hasPermissionTo('edit-action-points'))
                                                             @if($evaluatingId !== $ap->id)
                                                                 <button wire:click="startEvaluation({{ $ap->id }})"
                                                                     class="inline-flex items-center gap-1.5 text-xs font-semibold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors">
@@ -358,10 +358,10 @@
                                                                     Evaluatie toevoegen
                                                                 </button>
                                                             @endif
-                                                        @endcan
+                                                        @endif
                                                     </div>
 
-                                                    @can('create', \App\Models\Evaluation::class)
+                                                    @if(auth()->user()->hasPermissionTo('edit-action-points'))
                                                         @if($evaluatingId === $ap->id)
                                                         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-2 space-y-2">
                                                             <label class="block text-xs font-medium text-slate-700">Nieuwe evaluatie</label>
@@ -381,7 +381,7 @@
                                                             </div>
                                                         </div>
                                                     @endif
-                                                    @endcan
+                                                    @endif
 
                                                     @forelse($ap->evaluations->sortByDesc('created_at') as $eval)
                                                         <div class="bg-slate-100 rounded-lg px-3 py-2 mb-2">

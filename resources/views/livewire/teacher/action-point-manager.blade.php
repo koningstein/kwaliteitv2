@@ -14,7 +14,7 @@
                     Actiepunt toevoegen
                 </button>
             @endif
-        @endcan
+        @endif
     </div>
 
     {{-- ── Formulier: nieuw actiepunt ── --}}
@@ -76,7 +76,7 @@
                 </div>
             </div>
         @endif
-    @endcan
+    @endif
 
     {{-- ── Lijst van actiepunten ── --}}
     @forelse($criterion->actionPoints as $ap)
@@ -135,7 +135,7 @@
                         </div>
 
                         {{-- Evaluatie / toelichting: alleen tonen als gebruiker ook evaluaties mag aanmaken --}}
-                        @can('create', \App\Models\Evaluation::class)
+                        @if(auth()->user()->hasPermissionTo('edit-action-points'))
                             <div>
                                 <label class="block text-xs font-medium text-slate-700 mb-1">
                                     Evaluatie / toelichting
@@ -147,7 +147,7 @@
                                 ></textarea>
                                 @error('editEvaluationText') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                             </div>
-                        @endcan
+                        @endif
 
                         <div class="flex gap-2 pt-1">
                             <button wire:click="saveEdit"
@@ -161,7 +161,7 @@
                         </div>
                     </div>
                 @endif
-            @endcan
+            @endif
 
             {{-- ── Weergave-modus ── --}}
             @if($editingId !== $ap->id)
@@ -207,7 +207,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                     </svg>
                                 </button>
-                            @endcan
+                            @endif
                             @can('delete', $ap)
                                 <button wire:click="deleteActionPoint({{ $ap->id }})"
                                     wire:confirm="Weet je zeker dat je dit actiepunt wilt verwijderen?"
@@ -216,7 +216,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </button>
-                            @endcan
+                            @endif
                         </div>
                     </div>
 
@@ -233,7 +233,7 @@
                                 </svg>
                                 {{ $ap->evaluations->count() }} evaluatie(s)
                             </button>
-                            @can('create', \App\Models\Evaluation::class)
+                            @if(auth()->user()->hasPermissionTo('edit-action-points'))
                                 @if($evaluatingId !== $ap->id)
                                     <button
                                         wire:click="startEvaluation({{ $ap->id }})"
@@ -245,11 +245,11 @@
                                         Evaluatie toevoegen
                                     </button>
                                 @endif
-                            @endcan
+                            @endif
                         </div>
 
                         {{-- Evaluatie-formulier --}}
-                        @can('create', \App\Models\Evaluation::class)
+                        @if(auth()->user()->hasPermissionTo('edit-action-points'))
                             @if($evaluatingId === $ap->id)
                                 <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-2 space-y-2">
                                     <label class="block text-xs font-medium text-slate-700">Nieuwe evaluatie</label>
@@ -272,7 +272,7 @@
                                     </div>
                                 </div>
                             @endif
-                        @endcan
+                        @endif
 
                         {{-- Evaluatie-lijst --}}
                         @if(in_array($ap->id, $expandedEvaluations))
