@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Controllers\Controller;
 use App\Models\Criterion;
 use App\Models\ReportingPeriod;
+use App\Models\Team;
 use App\Models\Theme;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -18,21 +20,40 @@ class ThemeController extends Controller implements HasMiddleware
         ];
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $user           = auth()->user();
+        $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
+
+        if ($isGlobalViewer) {
+            $teams = Team::orderBy('name')->get();
+        } else {
+            $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
+            $teams   = $managed->isNotEmpty()
+                ? $managed
+                : ($user?->teams()->orderBy('name')->get() ?? collect());
+        }
+
+        $teamIdParam = $request->query('team');
+        $activeTeam  = $teamIdParam
+            ? $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first()
+            : $teams->first();
+
         $themes = Theme::withCount(['standards'])
             ->with('standards.criteria')
             ->get();
 
         return view('teacher.themes.index', [
-            'themes' => $themes,
+            'themes'     => $themes,
+            'teams'      => $teams,
+            'activeTeam' => $activeTeam,
         ]);
     }
 
-    public function show(Theme $theme)
+    public function show(Theme $theme, Request $request)
     {
         $user         = auth()->user();
-        $seeAll       = $user?->hasPermissionTo('view-all-action-points');
+        $isGlobalViewer = $user?->hasRole(['ok_medewerker', 'directie']);
         $isMedewerker = $user?->hasPermissionTo('edit-own-action-point-status')
                      || $user?->hasPermissionTo('edit-own-action-point-dates');
 
@@ -42,17 +63,20 @@ class ThemeController extends Controller implements HasMiddleware
             $activeTeam = null;
             $teamId     = null;
         } else {
-            // Bepaal beschikbare teams voor deze gebruiker
-            $managed = $user?->managedTeams;
-            $teams   = $managed?->isNotEmpty() ? $managed : $user?->teams;
+            if ($isGlobalViewer) {
+                $teams = Team::orderBy('name')->get();
+            } else {
+                $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
+                $teams   = $managed->isNotEmpty()
+                    ? $managed
+                    : ($user?->teams()->orderBy('name')->get() ?? collect());
+            }
 
-            // Bepaal actief team via ?team= param, of eerste team als fallback
-            $requestedTeamId = request()->query('team');
+            $requestedTeamId = $request->query('team');
             $activeTeam = $requestedTeamId
-                ? $teams?->firstWhere('id', $requestedTeamId)
-                : null;
-            $activeTeam = $activeTeam ?? $teams?->first();
-            $teamId     = $seeAll ? null : $activeTeam?->id;
+                ? $teams->firstWhere('id', (int) $requestedTeamId) ?? $teams->first()
+                : $teams->first();
+            $teamId = $activeTeam?->id;
         }
 
         $periods = ReportingPeriod::orderBy('sort_order')->get();
