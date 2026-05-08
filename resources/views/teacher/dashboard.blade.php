@@ -3,19 +3,34 @@
 
     <div class="space-y-8">
 
-        {{-- Team-tabs --}}
+        {{-- Team-selector: tabs bij ≤5 teams, dropdown bij meer --}}
         @if($teams->count() > 1)
-            <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-                @foreach($teams as $team)
+            @if($teams->count() <= 5)
+                <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+                    @foreach($teams as $team)
                         <a href="{{ route('teacher.dashboard', ['team' => $team->id]) }}"
-                       class="px-5 py-2 rounded-lg text-sm font-medium transition-all
-                              {{ $activeTeam?->id === $team->id
-                                  ? 'bg-white text-slate-900 shadow-sm'
-                                  : 'text-slate-500 hover:text-slate-700' }}">
-                        {{ $team->name }}
-                    </a>
-                @endforeach
-            </div>
+                           class="px-5 py-2 rounded-lg text-sm font-medium transition-all
+                                  {{ $activeTeam?->id === $team->id
+                                      ? 'bg-white text-slate-900 shadow-sm'
+                                      : 'text-slate-500 hover:text-slate-700' }}">
+                            {{ $team->name }}
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <div class="flex items-center gap-3">
+                    <label for="team-select" class="text-sm font-medium text-slate-600 whitespace-nowrap">Team:</label>
+                    <select id="team-select"
+                            onchange="window.location='{{ route('teacher.dashboard') }}?team='+this.value"
+                            class="text-sm border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 min-w-48">
+                        @foreach($teams as $team)
+                            <option value="{{ $team->id }}" {{ $activeTeam?->id === $team->id ? 'selected' : '' }}>
+                                {{ $team->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
         @elseif($activeTeam)
             <div class="text-sm font-semibold text-slate-700">{{ $activeTeam->name }}</div>
         @endif

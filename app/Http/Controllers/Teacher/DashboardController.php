@@ -48,27 +48,25 @@ class DashboardController extends Controller implements HasMiddleware
 
         $teamId = $activeTeam?->id;
 
-        // Actiepunten statistieken
+        // Actiepunten statistieken — altijd filteren op team als er een geselecteerd is
         $statuses = ActionPointStatus::withCount([
-            'actionPoints' => fn ($q) => (!$isGlobalViewer && $teamId)
+            'actionPoints' => fn ($q) => $teamId
                 ? $q->where('team_id', $teamId)
                 : $q,
         ])->get();
 
-        $totalActionPoints = ($isGlobalViewer && !$teamId)
-            ? ActionPoint::count()
-            : ActionPoint::where('team_id', $teamId)->count();
+        $totalActionPoints = $teamId
+            ? ActionPoint::where('team_id', $teamId)->count()
+            : ActionPoint::count();
 
         // Rapportageperiodes
         $periods = ReportingPeriod::orderBy('sort_order')->get();
 
-        // Statistieken per rapportageperiode
-        $periodStats = $periods->map(function ($period) use ($teamId, $isGlobalViewer) {
+        // Statistieken per rapportageperiode — altijd filteren op team als geselecteerd
+        $periodStats = $periods->map(function ($period) use ($teamId) {
             $query = CriterionScore::where('reporting_period_id', $period->id);
 
-            if (!$isGlobalViewer && $teamId) {
-                $query->where('team_id', $teamId);
-            } elseif ($teamId) {
+            if ($teamId) {
                 $query->where('team_id', $teamId);
             }
 
