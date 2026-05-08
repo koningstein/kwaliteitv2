@@ -88,9 +88,9 @@
         </div>
     </section>
 
-    {{-- Kenmerken --}}
+    {{-- Wat biedt het platform --}}
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-8">Wat biedt het platform</h2>
+        <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-8 text-center">Wat biedt het platform</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             {{-- Thema's & Criteria --}}
@@ -102,7 +102,7 @@
                 </div>
                 <h3 class="text-base font-bold text-slate-900 mb-2">Thema's &amp; Criteria</h3>
                 <p class="text-sm text-slate-500 leading-relaxed">
-                    Alle kwaliteitscriteria gestructureerd per thema en standaard. Beoordeel per rapportageperiode en houd de voortgang bij.
+                    Alle kwaliteitscriteria gestructureerd per thema en standaard. Beoordeel per rapportageperiode en houd de voortgang per team bij.
                 </p>
             </div>
 
@@ -115,7 +115,7 @@
                 </div>
                 <h3 class="text-base font-bold text-slate-900 mb-2">Actiepunten</h3>
                 <p class="text-sm text-slate-500 leading-relaxed">
-                    Koppel verbeteracties direct aan criteria. Wijs verantwoordelijken toe, stel deadlines in en volg de status per actiepunt.
+                    Koppel verbeteracties direct aan criteria. Wijs een teamlid aan als verantwoordelijke, stel een deadline in en volg de status.
                 </p>
             </div>
 
@@ -128,7 +128,7 @@
                 </div>
                 <h3 class="text-base font-bold text-slate-900 mb-2">Voortgang &amp; Rapportage</h3>
                 <p class="text-sm text-slate-500 leading-relaxed">
-                    Inzicht in de kwaliteitsstatus per jaar, per thema en per team. Overzichtelijke voortgangsbalken per rapportageperiode.
+                    Inzicht in de kwaliteitsstatus per periode, per thema en per team. Exporteer de rapportage eenvoudig naar PDF.
                 </p>
             </div>
 
@@ -141,7 +141,7 @@
                 </div>
                 <h3 class="text-base font-bold text-slate-900 mb-2">Teams</h3>
                 <p class="text-sm text-slate-500 leading-relaxed">
-                    Medewerkers zijn ingedeeld in teams met een teamleider. Actiepunten en verantwoordelijkheden zijn per team inzichtelijk.
+                    Medewerkers zijn ingedeeld in teams. Scores, actiepunten en verantwoordelijkheden zijn per team inzichtelijk.
                 </p>
             </div>
 
@@ -174,49 +174,110 @@
         </div>
     </section>
 
-    {{-- Statuslegenda --}}
+    {{-- Wie gebruikt het platform --}}
     <section class="border-t border-slate-200 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-6">Statusoverzicht</h2>
-            <div class="flex flex-wrap gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded-full bg-emerald-500"></div>
-                    <span class="text-sm text-slate-700 font-medium">Voldoende</span>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-10 text-center">Wie gebruikt het platform</h2>
+            <dl class="max-w-3xl mx-auto divide-y divide-slate-100">
+
+                <div class="flex items-center gap-6 py-4">
+                    <dt class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <span class="w-3 h-3 rounded-full bg-orange-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-900">Directie</span>
+                    </dt>
+                    <dd class="text-sm text-slate-500">Overzicht over alle teams en locaties schoolbreed.</dd>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded-full bg-amber-500"></div>
-                    <span class="text-sm text-slate-700 font-medium">Aandacht</span>
+
+                <div class="flex items-center gap-6 py-4">
+                    <dt class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <span class="w-3 h-3 rounded-full bg-violet-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-900">O&amp;K</span>
+                    </dt>
+                    <dd class="text-sm text-slate-500">Begeleidt meerdere teams in het kwaliteitsproces en beheert het systeem.</dd>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded-full bg-rose-500"></div>
-                    <span class="text-sm text-slate-700 font-medium">Onvoldoende</span>
+
+                <div class="flex items-center gap-6 py-4">
+                    <dt class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <span class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-900">Kwaliteitszorg</span>
+                    </dt>
+                    <dd class="text-sm text-slate-500">Beheert het eigen team, vult scores in en wijst actiepunten toe.</dd>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="w-4 h-4 rounded-full bg-slate-300"></div>
-                    <span class="text-sm text-slate-700 font-medium">Niet beoordeeld</span>
+
+                <div class="flex items-center gap-6 py-4">
+                    <dt class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-900">Onderwijsleider</span>
+                    </dt>
+                    <dd class="text-sm text-slate-500">Kijkt mee met meerdere teams en volgt de voortgang van criteria en actiepunten.</dd>
                 </div>
-                <div class="mx-3 w-px bg-slate-200 self-stretch"></div>
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-300">Op schema</span>
+
+                <div class="flex items-center gap-6 py-4">
+                    <dt class="flex items-center gap-3 w-44 flex-shrink-0">
+                        <span class="w-3 h-3 rounded-full bg-slate-400 flex-shrink-0"></span>
+                        <span class="text-sm font-semibold text-slate-900">Medewerker</span>
+                    </dt>
+                    <dd class="text-sm text-slate-500">Ziet eigen actiepunten en de voortgang van het team.</dd>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-300">Afgerond</span>
+
+            </dl>
+        </div>
+    </section>
+
+    {{-- Hoe werkt het --}}
+    <section class="border-t border-slate-200 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-10 text-center">Hoe werkt het</h2>
+
+            <div class="flex flex-col md:flex-row items-stretch gap-4">
+
+                {{-- Stap 1 --}}
+                <div class="flex-1 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">1</div>
+                        <div class="text-base font-semibold text-slate-900">Criteria beoordelen</div>
+                    </div>
+                    <p class="text-sm text-slate-500 leading-relaxed">Per rapportageperiode beoordeel je de criteria van jouw team. Elk criterium heeft indicatoren die helpen bepalen of de situatie voldoende, aandacht of onvoldoende scoort. Zo ontstaat per periode een helder beeld van de kwaliteit.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-300">Loopt achter</span>
+
+                {{-- Pijl --}}
+                <div class="hidden md:flex items-center justify-center flex-shrink-0 text-slate-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 border border-orange-300">Uitgesteld</span>
+
+                {{-- Stap 2 --}}
+                <div class="flex-1 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">2</div>
+                        <div class="text-base font-semibold text-slate-900">Actiepunten aanmaken</div>
+                    </div>
+                    <p class="text-sm text-slate-500 leading-relaxed">Wanneer een criterium aandacht of verbetering vraagt, maak je direct een actiepunt aan. Je koppelt het aan het criterium, wijst een teamlid aan als verantwoordelijke, stelt een start- en einddatum in en houdt de status bij.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-300">Niet gestart</span>
+
+                {{-- Pijl --}}
+                <div class="hidden md:flex items-center justify-center flex-shrink-0 text-slate-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </div>
+
+                {{-- Stap 3 --}}
+                <div class="flex-1 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">3</div>
+                        <div class="text-base font-semibold text-slate-900">Voortgang volgen</div>
+                    </div>
+                    <p class="text-sm text-slate-500 leading-relaxed">Op het dashboard zie je in één oogopslag hoe het team ervoor staat: hoeveel actiepunten lopen er, wat is de score per thema en hoe ontwikkelt de kwaliteit zich over meerdere periodes? De rapportage is exporteerbaar naar PDF.</p>
+                </div>
+
             </div>
         </div>
     </section>
 
     {{-- Footer --}}
-    <footer class="border-t border-slate-200 bg-slate-50">
+    <footer class="border-t border-slate-200 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
