@@ -47,7 +47,7 @@
                             @elseif($user?->hasRole('directie'))
                                 Directie
                             @else
-                                Schiedamseweg 245
+                                Techniek College Rotterdam
                             @endif
                         </div>
                     </div>
