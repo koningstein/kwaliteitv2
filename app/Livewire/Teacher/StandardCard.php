@@ -306,6 +306,28 @@ class StandardCard extends Component
         $this->reset(['evaluatingId', 'newEvaluationText']);
     }
 
+    // ── Deelnemers ───────────────────────────────────────────────────
+
+    public function addParticipant(int $actionPointId, int $userId): void
+    {
+        $ap = ActionPoint::findOrFail($actionPointId);
+        Gate::authorize('update', $ap);
+
+        if ($ap->user_id === $userId) {
+            return;
+        }
+
+        $ap->participants()->syncWithoutDetaching([$userId]);
+    }
+
+    public function removeParticipant(int $actionPointId, int $userId): void
+    {
+        $ap = ActionPoint::findOrFail($actionPointId);
+        Gate::authorize('update', $ap);
+
+        $ap->participants()->detach($userId);
+    }
+
     // ── Render ───────────────────────────────────────────────────────
 
     public function render()
@@ -325,6 +347,7 @@ class StandardCard extends Component
             'criteria.actionPoints.status',
             'criteria.actionPoints.user',
             'criteria.actionPoints.evaluations',
+            'criteria.actionPoints.participants',
         ])->findOrFail($this->standardId);
 
         $users = $this->teamUsers();

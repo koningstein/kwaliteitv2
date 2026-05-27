@@ -220,6 +220,31 @@ class ActionPointManager extends Component
         $this->reset(['evaluatingId', 'newEvaluationText']);
     }
 
+    // ── Deelnemers ──────────────────────────────────────────────────
+
+    public function addParticipant(int $actionPointId, int $userId): void
+    {
+        $ap = ActionPoint::findOrFail($actionPointId);
+
+        Gate::authorize('update', $ap);
+
+        // Verantwoordelijke kan niet ook deelnemer zijn
+        if ($ap->user_id === $userId) {
+            return;
+        }
+
+        $ap->participants()->syncWithoutDetaching([$userId]);
+    }
+
+    public function removeParticipant(int $actionPointId, int $userId): void
+    {
+        $ap = ActionPoint::findOrFail($actionPointId);
+
+        Gate::authorize('update', $ap);
+
+        $ap->participants()->detach($userId);
+    }
+
     // ── Render ──────────────────────────────────────────────────────
 
     public function render()
@@ -240,6 +265,7 @@ class ActionPointManager extends Component
             'actionPoints.evaluations' => fn ($q) => $q->orderBy('created_at', 'desc'),
             'actionPoints.evaluations.creator',
             'actionPoints.evaluations.updater',
+            'actionPoints.participants',
         ])->findOrFail($this->criterionId);
 
         $users = $this->teamUsers();

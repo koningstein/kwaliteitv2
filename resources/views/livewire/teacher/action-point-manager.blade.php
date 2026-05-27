@@ -176,8 +176,42 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                         </svg>
                                         {{ $ap->user->name }}
+                                        <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-xs font-medium">Verantwoordelijke</span>
                                     </span>
                                 @endif
+
+                                {{-- Deelnemers --}}
+                                @foreach($ap->participants as $participant)
+                                    <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs">
+                                        {{ $participant->name }}
+                                        @can('update', $ap)
+                                            <button
+                                                wire:click="removeParticipant({{ $ap->id }}, {{ $participant->id }})"
+                                                class="text-slate-400 hover:text-red-500 leading-none ml-0.5"
+                                                title="Verwijder deelnemer"
+                                            >&times;</button>
+                                        @endcan
+                                    </span>
+                                @endforeach
+
+                                {{-- Deelnemer toevoegen (alleen verantwoordelijke) --}}
+                                @can('update', $ap)
+                                    @php
+                                        $takenIds = $ap->participants->pluck('id')->push($ap->user_id)->all();
+                                        $availableUsers = $users->whereNotIn('id', $takenIds);
+                                    @endphp
+                                    @if($availableUsers->isNotEmpty())
+                                        <select
+                                            wire:change="addParticipant({{ $ap->id }}, $event.target.value)"
+                                            class="text-xs border border-dashed border-slate-300 rounded-full px-2 py-0.5 text-slate-500 bg-white hover:border-slate-400 focus:outline-none cursor-pointer"
+                                        >
+                                            <option value="">+ Deelnemer</option>
+                                            @foreach($availableUsers as $u)
+                                                <option value="{{ $u->id }}">{{ $u->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    @endif
+                                @endcan
                                 @if($ap->start_date)
                                     <span>
                                         {{ \Carbon\Carbon::parse($ap->start_date)->format('d-m-Y') }}

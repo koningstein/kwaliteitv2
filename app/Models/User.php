@@ -84,4 +84,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActionPoint::class);
     }
+
+    public function participatingActionPoints(): BelongsToMany
+    {
+        return $this->belongsToMany(ActionPoint::class, 'action_point_participants')->withTimestamps();
+    }
 }

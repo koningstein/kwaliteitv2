@@ -144,9 +144,10 @@ class DashboardController extends Controller implements HasMiddleware
             ];
         })->filter(fn ($stat) => $stat['total'] > 0)->values();
 
-        // Persoonlijke actiepunten — voor iedereen met toegewezen actiepunten
-        $myActionPoints = ActionPoint::with(['status', 'criterion.standard.theme'])
+        // Persoonlijke actiepunten — eigen actiepunten + actiepunten waaraan deelnemer
+        $myActionPoints = ActionPoint::with(['status', 'criterion.standard.theme', 'user'])
             ->where('user_id', $user->id)
+            ->orWhereHas('participants', fn ($q) => $q->where('users.id', $user->id))
             ->orderByRaw('end_date IS NULL, end_date ASC')
             ->get();
 
