@@ -49,6 +49,9 @@ class RolePermissionSeeder extends Seeder
 
             // Actiepunten (uitgebreid zichtbereik)
             'view-all-action-points',       // ok_medewerker + directie: alle actiepunten van alle teams zien
+
+            // Exports
+            'export-reports',               // ok_medewerker + kwaliteitszorg + onderwijsleider: PDF/Excel exporteren
         ];
 
         foreach ($permissions as $permission) {
@@ -97,6 +100,7 @@ class RolePermissionSeeder extends Seeder
             'manage-teams',
             'view-directie-dashboard',
             'view-team-dashboard',
+            'export-reports',
         ]);
 
         // -----------------------------------------------------------------------
@@ -117,6 +121,7 @@ class RolePermissionSeeder extends Seeder
             'edit-criteria-scores',
             'manage-team-users',
             'view-team-dashboard',
+            'export-reports',
         ]);
 
         // -----------------------------------------------------------------------
@@ -132,6 +137,7 @@ class RolePermissionSeeder extends Seeder
             'view-criteria-scores',
             'assign-team-quality-member',
             'view-team-dashboard',
+            'export-reports',
         ]);
 
         // -----------------------------------------------------------------------
