@@ -179,8 +179,8 @@
                                 <tr class="hover:bg-slate-50 transition-colors {{ $themeRoute ? 'cursor-pointer' : '' }}"
                                     @if($themeRoute) onclick="window.location='{{ $themeRoute }}'" @endif>
                                     <td class="px-5 py-3 text-slate-500 font-mono text-xs hidden sm:table-cell whitespace-nowrap">
-                                        @if($ap->criterion?->standard)
-                                            {{ $ap->criterion->standard->code }}.{{ $ap->criterion->number }}
+                                        @if($ap->criterion)
+                                            {{ $ap->criterion->number }}
                                         @else
                                             <span class="text-slate-300">—</span>
                                         @endif
