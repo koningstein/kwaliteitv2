@@ -153,6 +153,7 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden sm:table-cell">Criterium</th>
                                 <th class="text-left px-5 py-3 font-semibold text-slate-600">Omschrijving</th>
                                 <th class="text-left px-5 py-3 font-semibold text-slate-600 hidden sm:table-cell">Thema / Criterium</th>
                                 <th class="text-left px-5 py-3 font-semibold text-slate-600">Status</th>
@@ -177,6 +178,13 @@
                                 @endphp
                                 <tr class="hover:bg-slate-50 transition-colors {{ $themeRoute ? 'cursor-pointer' : '' }}"
                                     @if($themeRoute) onclick="window.location='{{ $themeRoute }}'" @endif>
+                                    <td class="px-5 py-3 text-slate-500 font-mono text-xs hidden sm:table-cell whitespace-nowrap">
+                                        @if($ap->criterion?->standard)
+                                            {{ $ap->criterion->standard->code }}.{{ $ap->criterion->number }}
+                                        @else
+                                            <span class="text-slate-300">—</span>
+                                        @endif
+                                    </td>
                                     <td class="px-5 py-3 text-slate-800 font-medium">
                                         {{ Str::limit($ap->description, 80) }}
                                     </td>
