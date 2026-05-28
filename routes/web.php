@@ -26,6 +26,7 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified', 'role:ok_medewerker'])
     ->name('dashboard');
 
+
 Route::middleware(['auth', 'verified', 'role:ok_medewerker'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('teams', TeamController::class);
