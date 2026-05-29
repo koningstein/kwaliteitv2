@@ -123,9 +123,7 @@
                             </div>
                         </div>
                     @else
-                        <p class="text-sm text-slate-600 leading-relaxed">
-                            {{ $explanation ?: 'Nog geen toelichting toegevoegd.' }}
-                        </p>
+                        <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{{ $explanation ?: 'Nog geen toelichting toegevoegd.' }}</p>
                     @endif
                 </div>
 
