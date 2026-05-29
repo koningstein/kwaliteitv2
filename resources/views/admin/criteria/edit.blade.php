@@ -2,8 +2,8 @@
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div class="flex items-center justify-between">
             <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Criterium bewerken: #{{ $criterion->number }}</h1>
-            <a href="{{ route('admin.criteria.index') }}" class="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" wire:navigate>
-                &larr; Terug naar overzicht
+            <a href="{{ route('admin.standards.show', $criterion->standard) }}" class="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" wire:navigate>
+                &larr; Terug naar {{ $criterion->standard->code }}
             </a>
         </div>
 
@@ -79,7 +79,7 @@
                     <button type="submit" class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
                         Criterium bijwerken
                     </button>
-                    <a href="{{ route('admin.criteria.index') }}" class="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" wire:navigate>
+                    <a href="{{ route('admin.standards.show', $criterion->standard) }}" class="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" wire:navigate>
                         Annuleren
                     </a>
                 </div>

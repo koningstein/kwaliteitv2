@@ -33,9 +33,9 @@ class CriterionController extends Controller implements HasMiddleware
 
     public function store(CriterionStoreRequest $request)
     {
-        Criterion::create($request->validated());
+        $criterion = Criterion::create($request->validated());
 
-        return redirect()->route('admin.criteria.index')
+        return redirect()->route('admin.standards.show', $criterion->standard_id)
             ->with('success', 'Criterium succesvol aangemaakt.');
     }
 
@@ -51,7 +51,7 @@ class CriterionController extends Controller implements HasMiddleware
     {
         $criterion->update($request->validated());
 
-        return redirect()->route('admin.criteria.index')
+        return redirect()->route('admin.standards.show', $criterion->standard_id)
             ->with('success', 'Criterium succesvol bijgewerkt.');
     }
 

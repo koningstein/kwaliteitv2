@@ -14,13 +14,20 @@ class ThemeController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:manage-themes', except: ['index']),
+            new Middleware('permission:manage-themes', except: ['index', 'show']),
         ];
     }
 
     public function index()
     {
         return view('admin.themes.index');
+    }
+
+    public function show(Theme $theme)
+    {
+        $theme->load(['standards' => fn($q) => $q->orderBy('code'), 'standards.criteria']);
+
+        return view('admin.themes.show', compact('theme'));
     }
 
     public function create()

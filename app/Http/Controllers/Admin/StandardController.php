@@ -15,13 +15,20 @@ class StandardController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:manage-standards', except: ['index']),
+            new Middleware('permission:manage-standards', except: ['index', 'show']),
         ];
     }
 
     public function index()
     {
         return view('admin.standards.index');
+    }
+
+    public function show(Standard $standard)
+    {
+        $standard->load(['theme', 'criteria' => fn($q) => $q->orderBy('number')]);
+
+        return view('admin.standards.show', compact('standard'));
     }
 
     public function create()

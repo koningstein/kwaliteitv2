@@ -28,7 +28,9 @@
                             </span>
                         </td>
                         <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                            {{ $standard->name }}
+                            <a href="{{ route('admin.standards.show', $standard) }}" class="hover:text-blue-600 hover:underline" wire:navigate>
+                                {{ $standard->name }}
+                            </a>
                         </td>
                         <td class="whitespace-nowrap px-6 py-4">
                             <div class="flex items-center gap-2">
