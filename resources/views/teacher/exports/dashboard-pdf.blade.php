@@ -711,7 +711,7 @@
                                 @if($criterion->explanation)
                                     <tr class="toelichting-row">
                                         <td colspan="{{ $periods->count() + 1 }}">
-                                            <strong>Toelichting:</strong> {{ $criterion->explanation }}
+                                            <strong>Toelichting:</strong> {!! nl2br(e($criterion->explanation)) !!}
                                         </td>
                                     </tr>
                                 @endif

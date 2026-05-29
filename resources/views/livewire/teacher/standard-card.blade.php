@@ -146,9 +146,7 @@
                                         </div>
                                     </div>
                                 @else
-                                    <p class="text-sm text-slate-600 leading-relaxed">
-                                        {{ $explanations[$criterion->id] ?? 'Nog geen toelichting toegevoegd.' }}
-                                    </p>
+                                    <p class="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{{ $criterion->explanation ?: 'Nog geen toelichting toegevoegd.' }}</p>
                                 @endif
                             </div>
 
