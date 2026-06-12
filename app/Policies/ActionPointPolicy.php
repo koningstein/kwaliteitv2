@@ -23,9 +23,10 @@ class ActionPointPolicy
             return true;
         }
 
-        // Medewerker-scope: edit-own-* permissions → alleen eigen toegewezen actiepunten
+        // Medewerker-scope: ziet alle actiepunten van zijn eigen team
         if ($user->hasPermissionTo('edit-own-action-point-status') || $user->hasPermissionTo('edit-own-action-point-dates')) {
-            return $actionPoint->user_id === $user->id;
+            return $actionPoint->team_id !== null
+                && $user->teams->contains($actionPoint->team_id);
         }
 
         // Iedereen met view-action-points maar zonder view-all: eigen team (kwaliteitszorg, onderwijsleider)

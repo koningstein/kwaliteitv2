@@ -57,27 +57,23 @@ class ThemeController extends Controller implements HasMiddleware
         $isMedewerker = $user?->hasPermissionTo('edit-own-action-point-status')
                      || $user?->hasPermissionTo('edit-own-action-point-dates');
 
-        if ($isMedewerker) {
-            // Medewerker heeft geen team-tabs; ziet eigen actiepunten via user_id
-            $teams      = collect();
-            $activeTeam = null;
-            $teamId     = null;
+        if ($isGlobalViewer) {
+            $teams = Team::orderBy('name')->get();
+        } elseif ($isMedewerker) {
+            // Medewerker ziet alleen zijn eigen teams; team-tabs tonen bij meerdere teams
+            $teams = $user?->teams()->orderBy('name')->get() ?? collect();
         } else {
-            if ($isGlobalViewer) {
-                $teams = Team::orderBy('name')->get();
-            } else {
-                $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
-                $teams   = $managed->isNotEmpty()
-                    ? $managed
-                    : ($user?->teams()->orderBy('name')->get() ?? collect());
-            }
-
-            $requestedTeamId = $request->query('team');
-            $activeTeam = $requestedTeamId
-                ? $teams->firstWhere('id', (int) $requestedTeamId) ?? $teams->first()
-                : $teams->first();
-            $teamId = $activeTeam?->id;
+            $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
+            $teams   = $managed->isNotEmpty()
+                ? $managed
+                : ($user?->teams()->orderBy('name')->get() ?? collect());
         }
+
+        $requestedTeamId = $request->query('team');
+        $activeTeam = $requestedTeamId
+            ? $teams->firstWhere('id', (int) $requestedTeamId) ?? $teams->first()
+            : $teams->first();
+        $teamId = $activeTeam?->id;
 
         $periods = ReportingPeriod::orderBy('sort_order')->get();
 
@@ -91,14 +87,10 @@ class ThemeController extends Controller implements HasMiddleware
                 ? $q->where('team_id', $teamId)
                 : $q,
             'standards.criteria.scores.reportingPeriod',
-            // Actiepunten: medewerker ziet alleen eigen, anderen gefilterd op team
-            'standards.criteria.actionPoints'  => function ($q) use ($isMedewerker, $teamId, $user) {
-                if ($isMedewerker) {
-                    $q->where('user_id', $user->id);
-                } elseif ($teamId) {
-                    $q->where('team_id', $teamId);
-                }
-            },
+            // Actiepunten gefilterd op actief team
+            'standards.criteria.actionPoints'  => fn ($q) => $teamId
+                ? $q->where('team_id', $teamId)
+                : $q,
             'standards.criteria.actionPoints.status',
             'standards.criteria.actionPoints.user',
             'standards.criteria.actionPoints.evaluations',
