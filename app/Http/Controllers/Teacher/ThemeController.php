@@ -34,10 +34,16 @@ class ThemeController extends Controller implements HasMiddleware
                 : ($user?->teams()->orderBy('name')->get() ?? collect());
         }
 
+        $teams->load('locations');
+
         $teamIdParam = $request->query('team');
-        $activeTeam  = $teamIdParam
-            ? $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first()
-            : $teams->first();
+        if ($teamIdParam) {
+            $activeTeam = $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first();
+            session(['active_team_id' => $activeTeam->id]);
+        } else {
+            $storedId   = session('active_team_id');
+            $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
+        }
 
         $themes = Theme::withCount(['standards'])
             ->with('standards.criteria')
@@ -69,10 +75,16 @@ class ThemeController extends Controller implements HasMiddleware
                 : ($user?->teams()->orderBy('name')->get() ?? collect());
         }
 
+        $teams->load('locations');
+
         $requestedTeamId = $request->query('team');
-        $activeTeam = $requestedTeamId
-            ? $teams->firstWhere('id', (int) $requestedTeamId) ?? $teams->first()
-            : $teams->first();
+        if ($requestedTeamId) {
+            $activeTeam = $teams->firstWhere('id', (int) $requestedTeamId) ?? $teams->first();
+            session(['active_team_id' => $activeTeam->id]);
+        } else {
+            $storedId   = session('active_team_id');
+            $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
+        }
         $teamId = $activeTeam?->id;
 
         $periods = ReportingPeriod::orderBy('sort_order')->get();

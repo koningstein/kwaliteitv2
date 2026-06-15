@@ -197,15 +197,19 @@
                                 {{-- Deelnemer toevoegen (alleen verantwoordelijke) --}}
                                 @can('update', $ap)
                                     @php
-                                        $takenIds = $ap->participants->pluck('id')->push($ap->user_id)->all();
+                                        $takenIds = $ap->participants->pluck('id')->push($ap->user_id)->filter()->all();
                                         $availableUsers = $users->whereNotIn('id', $takenIds);
+                                        $allAdded = $availableUsers->isEmpty();
                                     @endphp
-                                    @if($availableUsers->isNotEmpty())
+                                    @if(!$allAdded || $teamId)
                                         <select
                                             wire:change="addParticipant({{ $ap->id }}, $event.target.value)"
                                             class="text-xs border border-dashed border-slate-300 rounded-full px-2 py-0.5 text-slate-500 bg-white hover:border-slate-400 focus:outline-none cursor-pointer"
                                         >
                                             <option value="">+ Deelnemer</option>
+                                            @if($teamId && !$allAdded)
+                                                <option value="__team__">👥 Heel het team</option>
+                                            @endif
                                             @foreach($availableUsers as $u)
                                                 <option value="{{ $u->id }}">{{ $u->name }}</option>
                                             @endforeach
@@ -312,17 +316,56 @@
                         @if(in_array($ap->id, $expandedEvaluations))
                             @forelse($ap->evaluations->sortByDesc('created_at') as $eval)
                                 <div class="bg-slate-50 rounded-lg px-3 py-2 mb-2">
-                                    {{-- Auditinfo evaluatie --}}
-                                    <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-400 mb-1">
-                                        @if($eval->creator)
-                                            <span>Door: {{ $eval->creator->name }}</span>
-                                        @endif
-                                        <span>{{ $eval->created_at?->format('d-m-Y H:i') }}</span>
-                                        @if($eval->updater && $eval->updated_at?->gt($eval->created_at))
-                                            <span class="italic">Bewerkt door {{ $eval->updater->name }} op {{ $eval->updated_at->format('d-m-Y H:i') }}</span>
-                                        @endif
-                                    </div>
-                                    <p class="text-sm text-slate-700 leading-snug">{{ $eval->description }}</p>
+                                    @if($editingEvaluationId === $eval->id)
+                                        {{-- Edit-modus evaluatie --}}
+                                        <div class="space-y-2">
+                                            <textarea wire:model="editingEvaluationText" rows="3"
+                                                class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"></textarea>
+                                            <div class="flex gap-2">
+                                                <button wire:click="updateEvaluation"
+                                                    class="px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors">
+                                                    Opslaan
+                                                </button>
+                                                <button wire:click="cancelEditEvaluation"
+                                                    class="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs font-medium rounded-lg hover:bg-slate-50 transition-colors">
+                                                    Annuleren
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @else
+                                        {{-- Weergave-modus evaluatie --}}
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-400 mb-1">
+                                                    @if($eval->creator)
+                                                        <span>Door: {{ $eval->creator->name }}</span>
+                                                    @endif
+                                                    <span>{{ $eval->created_at?->format('d-m-Y H:i') }}</span>
+                                                    @if($eval->updater && $eval->updated_at?->gt($eval->created_at))
+                                                        <span class="italic">Bewerkt door {{ $eval->updater->name }} op {{ $eval->updated_at->format('d-m-Y H:i') }}</span>
+                                                    @endif
+                                                </div>
+                                                <p class="text-sm text-slate-700 leading-snug">{{ $eval->description }}</p>
+                                            </div>
+                                            @if(auth()->user()->hasPermissionTo('edit-action-points'))
+                                                <div class="flex items-center gap-1 flex-shrink-0">
+                                                    <button wire:click="editEvaluation({{ $eval->id }})"
+                                                        class="p-1 text-slate-400 hover:text-slate-700 rounded hover:bg-slate-200 transition-colors" title="Bewerken">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                        </svg>
+                                                    </button>
+                                                    <button wire:click="deleteEvaluation({{ $eval->id }})"
+                                                        wire:confirm="Weet je zeker dat je deze evaluatie wilt verwijderen?"
+                                                        class="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors" title="Verwijderen">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             @empty
                                 <p class="text-xs text-slate-400 italic">Nog geen evaluaties.</p>

@@ -40,11 +40,17 @@ class DashboardController extends Controller implements HasMiddleware
                 : ($user?->teams()->orderBy('name')->get() ?? collect());
         }
 
-        // Actief team bepalen via ?team= queryparameter
+        $teams->load('locations');
+
+        // Actief team bepalen: URL-param heeft prioriteit, daarna sessie, dan eerste team
         $teamIdParam = $request->query('team');
-        $activeTeam  = $teamIdParam
-            ? $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first()
-            : $teams->first();
+        if ($teamIdParam) {
+            $activeTeam = $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first();
+            session(['active_team_id' => $activeTeam->id]);
+        } else {
+            $storedId   = session('active_team_id');
+            $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
+        }
 
         $teamId = $activeTeam?->id;
 
@@ -144,10 +150,14 @@ class DashboardController extends Controller implements HasMiddleware
             ];
         })->filter(fn ($stat) => $stat['total'] > 0)->values();
 
-        // Persoonlijke actiepunten — eigen actiepunten + actiepunten waaraan deelnemer
+        // Persoonlijke actiepunten — eigen, als deelnemer, of teamtaak voor eigen teams
+        $userTeamIds = $user?->teams()->pluck('teams.id')->toArray() ?? [];
         $myActionPoints = ActionPoint::with(['status', 'criterion.standard.theme', 'user'])
-            ->where('user_id', $user->id)
-            ->orWhereHas('participants', fn ($q) => $q->where('users.id', $user->id))
+            ->where(function ($q) use ($user, $userTeamIds) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('participants', fn ($q2) => $q2->where('users.id', $user->id))
+                  ->orWhere(fn ($q3) => $q3->whereNull('user_id')->whereIn('team_id', $userTeamIds));
+            })
             ->orderByRaw('end_date IS NULL, end_date ASC')
             ->get();
 

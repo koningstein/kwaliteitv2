@@ -21,4 +21,5 @@ class Criterion extends Model
     public function indicators(): HasMany { return $this->hasMany(Indicator::class); }
     public function scores(): HasMany { return $this->hasMany(CriterionScore::class); }
     public function actionPoints(): HasMany { return $this->hasMany(ActionPoint::class); }
+    public function remarks(): HasMany { return $this->hasMany(CriterionRemark::class); }
 }

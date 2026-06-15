@@ -134,6 +134,7 @@ class RolePermissionSeeder extends Seeder
             'view-dashboard',
             'view-themes',
             'view-action-points',
+            'create-action-points',
             'view-criteria-scores',
             'assign-team-quality-member',
             'view-team-dashboard',

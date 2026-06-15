@@ -42,6 +42,8 @@ class ActionPointController extends Controller implements HasMiddleware
                 : ($authUser?->teams()->orderBy('name')->get() ?? collect());
         }
 
+        $teams->load('locations');
+
         // Geen teams: lege state tonen
         if ($teams->isEmpty()) {
             return view('teacher.action-points.index', [
@@ -68,9 +70,13 @@ class ActionPointController extends Controller implements HasMiddleware
             }
         }
         if (! $activeTeam) {
-            $activeTeam = $teamIdParam
-                ? $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first()
-                : $teams->first();
+            if ($teamIdParam) {
+                $activeTeam = $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first();
+                session(['active_team_id' => $activeTeam->id]);
+            } else {
+                $storedId   = session('active_team_id');
+                $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
+            }
         }
 
         // --- Gebruikerslijst voor dropdown ---

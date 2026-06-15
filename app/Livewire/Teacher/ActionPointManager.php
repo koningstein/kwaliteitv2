@@ -20,7 +20,7 @@ class ActionPointManager extends Component
 
     public string $newDescription = '';
 
-    public ?int $newUserId = null;
+    public ?string $newUserId = null;
 
     public string $newStartDate = '';
 
@@ -30,13 +30,13 @@ class ActionPointManager extends Component
 
     public string $editDescription = '';
 
-    public ?int $editUserId = null;
+    public ?string $editUserId = null;
 
     public string $editStartDate = '';
 
     public string $editEndDate = '';
 
-    public ?int $editStatusId = null;
+    public ?string $editStatusId = null;
 
     public string $editEvaluationText = '';
 
@@ -45,6 +45,10 @@ class ActionPointManager extends Component
     public string $newEvaluationText = '';
 
     public array $expandedEvaluations = [];
+
+    public ?int $editingEvaluationId = null;
+
+    public string $editingEvaluationText = '';
 
     public bool $isMedewerker = false;
 
@@ -77,27 +81,27 @@ class ActionPointManager extends Component
 
         $this->validate([
             'newDescription' => 'required|string|max:1000',
-            'newUserId' => 'required|exists:users,id',
-            'newStartDate' => 'required|date',
-            'newEndDate' => 'required|date|after_or_equal:newStartDate',
+            'newUserId'      => 'required|exists:users,id',
+            'newStartDate'   => 'required|date',
+            'newEndDate'     => 'required|date|after_or_equal:newStartDate',
         ], [
-            'newDescription.required' => 'Beschrijving is verplicht.',
-            'newUserId.required' => 'Kies een verantwoordelijke.',
-            'newStartDate.required' => 'Startdatum is verplicht.',
-            'newEndDate.required' => 'Einddatum is verplicht.',
-            'newEndDate.after_or_equal' => 'Einddatum moet op of na de startdatum liggen.',
+            'newDescription.required'      => 'Beschrijving is verplicht.',
+            'newUserId.required'           => 'Kies een verantwoordelijke.',
+            'newStartDate.required'        => 'Startdatum is verplicht.',
+            'newEndDate.required'          => 'Einddatum is verplicht.',
+            'newEndDate.after_or_equal'    => 'Einddatum moet op of na de startdatum liggen.',
         ]);
 
         $defaultStatus = ActionPointStatus::where('name', 'Niet gestart')->first();
 
-        ActionPoint::create([
-            'criterion_id' => $this->criterionId,
-            'user_id' => $this->newUserId,
-            'team_id' => $this->teamId,
+        $ap = ActionPoint::create([
+            'criterion_id'           => $this->criterionId,
+            'user_id'                => (int) $this->newUserId,
+            'team_id'                => $this->teamId,
             'action_point_status_id' => $defaultStatus?->id,
-            'description' => $this->newDescription,
-            'start_date' => $this->newStartDate,
-            'end_date' => $this->newEndDate,
+            'description'            => $this->newDescription,
+            'start_date'             => $this->newStartDate,
+            'end_date'               => $this->newEndDate,
         ]);
 
         $this->reset(['newDescription', 'newUserId', 'newStartDate', 'newEndDate', 'showAddForm']);
@@ -113,10 +117,10 @@ class ActionPointManager extends Component
 
         $this->editingId = $id;
         $this->editDescription = $ap->description;
-        $this->editUserId = $ap->user_id;
+        $this->editUserId = $ap->user_id ? (string) $ap->user_id : null;
         $this->editStartDate = $ap->start_date ? \Carbon\Carbon::parse($ap->start_date)->format('Y-m-d') : '';
         $this->editEndDate = $ap->end_date ? \Carbon\Carbon::parse($ap->end_date)->format('Y-m-d') : '';
-        $this->editStatusId = $ap->action_point_status_id;
+        $this->editStatusId = $ap->action_point_status_id ? (string) $ap->action_point_status_id : null;
         $this->editEvaluationText = '';
     }
 
@@ -144,7 +148,7 @@ class ActionPointManager extends Component
 
         $ap->update([
             'description' => $this->editDescription,
-            'user_id' => $this->editUserId,
+            'user_id' => $this->editUserId ? (int) $this->editUserId : null,
             'start_date' => $this->editStartDate,
             'end_date' => $this->editEndDate,
             'action_point_status_id' => $this->editStatusId,
@@ -220,20 +224,65 @@ class ActionPointManager extends Component
         $this->reset(['evaluatingId', 'newEvaluationText']);
     }
 
+    public function editEvaluation(int $evalId): void
+    {
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
+
+        $eval = Evaluation::findOrFail($evalId);
+        $this->editingEvaluationId   = $evalId;
+        $this->editingEvaluationText = $eval->description;
+    }
+
+    public function updateEvaluation(): void
+    {
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
+
+        $this->validate([
+            'editingEvaluationText' => 'required|string|max:2000',
+        ], [
+            'editingEvaluationText.required' => 'Voer een evaluatietekst in.',
+        ]);
+
+        Evaluation::where('id', $this->editingEvaluationId)->update([
+            'description' => $this->editingEvaluationText,
+        ]);
+
+        $this->reset(['editingEvaluationId', 'editingEvaluationText']);
+    }
+
+    public function cancelEditEvaluation(): void
+    {
+        $this->reset(['editingEvaluationId', 'editingEvaluationText']);
+    }
+
+    public function deleteEvaluation(int $evalId): void
+    {
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
+
+        Evaluation::findOrFail($evalId)->delete();
+    }
+
     // ── Deelnemers ──────────────────────────────────────────────────
 
-    public function addParticipant(int $actionPointId, int $userId): void
+    public function addParticipant(int $actionPointId, string $userId): void
     {
         $ap = ActionPoint::findOrFail($actionPointId);
 
         Gate::authorize('update', $ap);
 
-        // Verantwoordelijke kan niet ook deelnemer zijn
-        if ($ap->user_id === $userId) {
+        if ($userId === '__team__') {
+            $deelnemerIds = $this->teamUsers()
+                ->reject(fn ($u) => $u->id === $ap->user_id)
+                ->pluck('id')->all();
+            $ap->participants()->syncWithoutDetaching($deelnemerIds);
             return;
         }
 
-        $ap->participants()->syncWithoutDetaching([$userId]);
+        if ($ap->user_id === (int) $userId) {
+            return;
+        }
+
+        $ap->participants()->syncWithoutDetaching([(int) $userId]);
     }
 
     public function removeParticipant(int $actionPointId, int $userId): void
@@ -250,10 +299,15 @@ class ActionPointManager extends Component
     public function render()
     {
         $criterion = Criterion::with([
-            // Actiepunten gefilterd: medewerker → eigen user_id, anderen → team_id
+            // Actiepunten gefilterd: medewerker → eigen of teamtaken, anderen → team_id
             'actionPoints' => function ($q) {
                 if ($this->isMedewerker) {
-                    $q->where('user_id', auth()->id());
+                    $userId = auth()->id();
+                    $teamId = $this->teamId;
+                    $q->where(fn ($q2) => $q2
+                        ->where('user_id', $userId)
+                        ->orWhere(fn ($q3) => $q3->whereNull('user_id')->when($teamId, fn ($q4) => $q4->where('team_id', $teamId)))
+                    );
                 } elseif ($this->teamId) {
                     $q->where('team_id', $this->teamId);
                 }

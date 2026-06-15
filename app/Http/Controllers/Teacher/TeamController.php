@@ -43,11 +43,17 @@ class TeamController extends Controller implements HasMiddleware
             ]);
         }
 
-        // Actief team bepalen via ?team= parameter
+        $teams->load('locations');
+
+        // Actief team bepalen: URL-param heeft prioriteit, daarna sessie, dan eerste team
         $teamIdParam = $request->query('team');
-        $activeTeam = $teamIdParam
-            ? $teams->firstWhere('id', (int) $teamIdParam)
-            : $teams->first();
+        if ($teamIdParam) {
+            $activeTeam = $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first();
+            session(['active_team_id' => $activeTeam->id]);
+        } else {
+            $storedId   = session('active_team_id');
+            $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
+        }
 
         // Teamleden ophalen voor het actieve team
         $users = User::with([

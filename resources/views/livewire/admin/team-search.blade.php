@@ -13,6 +13,7 @@
             <thead class="bg-zinc-50 dark:bg-zinc-800">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Naam</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Locatie</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Leden</th>
                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Teamleiders</th>
                 <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Acties</th>
@@ -23,6 +24,9 @@
                 <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                     <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-100">
                         {{ $team->name }}
+                    </td>
+                    <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                        {{ $team->locations->pluck('name')->join(', ') ?: '—' }}
                     </td>
                     <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
                         {{ $team->users_count }}
@@ -60,7 +64,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="px-6 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                    <td colspan="5" class="px-6 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
                         Geen teams gevonden.
                     </td>
                 </tr>

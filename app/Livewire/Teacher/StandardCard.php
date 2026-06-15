@@ -5,6 +5,7 @@ namespace App\Livewire\Teacher;
 use App\Models\ActionPoint;
 use App\Models\ActionPointStatus;
 use App\Models\Criterion;
+use App\Models\CriterionRemark;
 use App\Models\CriterionScore;
 use App\Models\Evaluation;
 use App\Models\Standard;
@@ -30,11 +31,15 @@ class StandardCard extends Component
 
     public array $editingExplanation = [];
 
+    public array $remarks = [];
+
+    public array $editingRemark = [];
+
     public ?int $showAddFormFor = null;
 
     public string $newDescription = '';
 
-    public ?int $newUserId = null;
+    public ?string $newUserId = null;
 
     public string $newStartDate = '';
 
@@ -44,19 +49,23 @@ class StandardCard extends Component
 
     public string $editDescription = '';
 
-    public ?int $editUserId = null;
+    public ?string $editUserId = null;
 
     public string $editStartDate = '';
 
     public string $editEndDate = '';
 
-    public ?int $editStatusId = null;
+    public ?string $editStatusId = null;
 
     public string $editEvaluationText = '';
 
     public ?int $evaluatingId = null;
 
     public string $newEvaluationText = '';
+
+    public ?int $editingEvaluationId = null;
+
+    public string $editingEvaluationText = '';
 
     // ── Hulpfuncties voor team-scope ─────────────────────────────────
 
@@ -105,6 +114,12 @@ class StandardCard extends Component
             foreach ($teamScores as $score) {
                 $this->scores[$criterion->id][$score->reporting_period_id] = $score->status;
             }
+
+            // Laad team-opmerking voor dit criterium
+            $remark = $this->teamId
+                ? CriterionRemark::where('criterion_id', $criterion->id)->where('team_id', $this->teamId)->first()
+                : null;
+            $this->remarks[$criterion->id] = $remark?->remark ?? '';
         }
     }
 
@@ -152,14 +167,45 @@ class StandardCard extends Component
 
     public function saveExplanation(int $criterionId): void
     {
+        Gate::authorize('manage-criteria');
         Criterion::where('id', $criterionId)->update(['explanation' => $this->explanations[$criterionId] ?? '']);
         $this->editingExplanation[$criterionId] = false;
     }
 
     public function cancelExplanation(int $criterionId): void
     {
+        Gate::authorize('manage-criteria');
         $this->explanations[$criterionId] = Criterion::find($criterionId)?->explanation ?? '';
         $this->editingExplanation[$criterionId] = false;
+    }
+
+    // ── Team-opmerking ──────────────────────────────────────────────
+
+    public function startEditRemark(int $criterionId): void
+    {
+        $this->editingRemark[$criterionId] = true;
+    }
+
+    public function saveRemark(int $criterionId): void
+    {
+        Gate::authorize('create', ActionPoint::class);
+        abort_unless($this->teamId, 403);
+
+        CriterionRemark::updateOrCreate(
+            ['criterion_id' => $criterionId, 'team_id' => $this->teamId],
+            ['remark' => $this->remarks[$criterionId] ?? '', 'user_id' => auth()->id()]
+        );
+
+        $this->editingRemark[$criterionId] = false;
+    }
+
+    public function cancelRemark(int $criterionId): void
+    {
+        $remark = $this->teamId
+            ? CriterionRemark::where('criterion_id', $criterionId)->where('team_id', $this->teamId)->first()
+            : null;
+        $this->remarks[$criterionId] = $remark?->remark ?? '';
+        $this->editingRemark[$criterionId] = false;
     }
 
     // ── Actiepunten: nieuw ───────────────────────────────────────────
@@ -182,27 +228,27 @@ class StandardCard extends Component
 
         $this->validate([
             'newDescription' => 'required|string|max:1000',
-            'newUserId' => 'required|exists:users,id',
-            'newStartDate' => 'required|date',
-            'newEndDate' => 'required|date|after_or_equal:newStartDate',
+            'newUserId'      => 'required|exists:users,id',
+            'newStartDate'   => 'required|date',
+            'newEndDate'     => 'required|date|after_or_equal:newStartDate',
         ], [
-            'newDescription.required' => 'Beschrijving is verplicht.',
-            'newUserId.required' => 'Kies een verantwoordelijke.',
-            'newStartDate.required' => 'Startdatum is verplicht.',
-            'newEndDate.required' => 'Einddatum is verplicht.',
+            'newDescription.required'   => 'Beschrijving is verplicht.',
+            'newUserId.required'        => 'Kies een verantwoordelijke.',
+            'newStartDate.required'     => 'Startdatum is verplicht.',
+            'newEndDate.required'       => 'Einddatum is verplicht.',
             'newEndDate.after_or_equal' => 'Einddatum moet op of na de startdatum liggen.',
         ]);
 
         $defaultStatus = ActionPointStatus::where('name', 'Niet gestart')->first();
 
-        ActionPoint::create([
-            'criterion_id' => $this->showAddFormFor,
-            'user_id' => $this->newUserId,
-            'team_id' => $this->teamId,
+        $ap = ActionPoint::create([
+            'criterion_id'           => $this->showAddFormFor,
+            'user_id'                => (int) $this->newUserId,
+            'team_id'                => $this->teamId,
             'action_point_status_id' => $defaultStatus?->id,
-            'description' => $this->newDescription,
-            'start_date' => $this->newStartDate,
-            'end_date' => $this->newEndDate,
+            'description'            => $this->newDescription,
+            'start_date'             => $this->newStartDate,
+            'end_date'               => $this->newEndDate,
         ]);
 
         $this->showAddFormFor = null;
@@ -217,10 +263,10 @@ class StandardCard extends Component
         Gate::authorize('update', $ap);
         $this->editingActionPointId = $id;
         $this->editDescription = $ap->description;
-        $this->editUserId = $ap->user_id;
+        $this->editUserId = $ap->user_id ? (string) $ap->user_id : null;
         $this->editStartDate = $ap->start_date ? \Carbon\Carbon::parse($ap->start_date)->format('Y-m-d') : '';
         $this->editEndDate = $ap->end_date ? \Carbon\Carbon::parse($ap->end_date)->format('Y-m-d') : '';
-        $this->editStatusId = $ap->action_point_status_id;
+        $this->editStatusId = $ap->action_point_status_id ? (string) $ap->action_point_status_id : null;
         $this->editEvaluationText = '';
     }
 
@@ -247,7 +293,7 @@ class StandardCard extends Component
 
         ActionPoint::where('id', $this->editingActionPointId)->update([
             'description' => $this->editDescription,
-            'user_id' => $this->editUserId,
+            'user_id' => $this->editUserId ? (int) $this->editUserId : null,
             'start_date' => $this->editStartDate,
             'end_date' => $this->editEndDate,
             'action_point_status_id' => $this->editStatusId,
@@ -306,18 +352,57 @@ class StandardCard extends Component
         $this->reset(['evaluatingId', 'newEvaluationText']);
     }
 
+    public function editEvaluation(int $evalId): void
+    {
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
+        $eval = Evaluation::findOrFail($evalId);
+        $this->editingEvaluationId   = $evalId;
+        $this->editingEvaluationText = $eval->description;
+    }
+
+    public function updateEvaluation(): void
+    {
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
+        $this->validate(['editingEvaluationText' => 'required|string|max:2000'], [
+            'editingEvaluationText.required' => 'Voer een evaluatietekst in.',
+        ]);
+        Evaluation::where('id', $this->editingEvaluationId)->update([
+            'description' => $this->editingEvaluationText,
+        ]);
+        $this->reset(['editingEvaluationId', 'editingEvaluationText']);
+    }
+
+    public function cancelEditEvaluation(): void
+    {
+        $this->reset(['editingEvaluationId', 'editingEvaluationText']);
+    }
+
+    public function deleteEvaluation(int $evalId): void
+    {
+        abort_unless(auth()->user()->hasPermissionTo('edit-action-points'), 403);
+        Evaluation::findOrFail($evalId)->delete();
+    }
+
     // ── Deelnemers ───────────────────────────────────────────────────
 
-    public function addParticipant(int $actionPointId, int $userId): void
+    public function addParticipant(int $actionPointId, string $userId): void
     {
         $ap = ActionPoint::findOrFail($actionPointId);
         Gate::authorize('update', $ap);
 
-        if ($ap->user_id === $userId) {
+        if ($userId === '__team__') {
+            $deelnemerIds = $this->teamUsers()
+                ->reject(fn ($u) => $u->id === $ap->user_id)
+                ->pluck('id')->all();
+            $ap->participants()->syncWithoutDetaching($deelnemerIds);
             return;
         }
 
-        $ap->participants()->syncWithoutDetaching([$userId]);
+        if ($ap->user_id === (int) $userId) {
+            return;
+        }
+
+        $ap->participants()->syncWithoutDetaching([(int) $userId]);
     }
 
     public function removeParticipant(int $actionPointId, int $userId): void
