@@ -83,7 +83,7 @@
                     </div>
 
                     <div x-show="tab === 'beheer'" class="mt-6">
-                        <livewire:teacher.team-manager />
+                        <livewire:teacher.team-manager :teamId="$activeTeam->id" />
                     </div>
                 </div>
 

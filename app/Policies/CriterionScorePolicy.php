@@ -39,9 +39,17 @@ class CriterionScorePolicy
             return false;
         }
 
-        // edit-criteria-scores is alleen toegewezen aan kwaliteitszorg: eigen team
-        return $criterionScore->team_id !== null
-            && $user->teams->contains($criterionScore->team_id);
+        // O&K (manage-teams) mag scores van alle teams bewerken
+        if ($user->hasPermissionTo('manage-teams')) {
+            return true;
+        }
+
+        // Onderwijsleider mag scores van zijn beheerde teams bewerken
+        // Kwaliteitszorg mag scores van zijn eigen team bewerken
+        return $criterionScore->team_id !== null && (
+            $user->teams->contains($criterionScore->team_id) ||
+            $user->managedTeams->contains($criterionScore->team_id)
+        );
     }
 
     public function delete(User $user, CriterionScore $criterionScore): bool

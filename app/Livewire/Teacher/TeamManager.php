@@ -11,6 +11,9 @@ use Livewire\Component;
 
 class TeamManager extends Component
 {
+    // Actief team (meegegeven vanuit de view)
+    public ?int $teamId = null;
+
     // Formulier nieuw lid aanmaken
     public string $name = '';
     public string $email = '';
@@ -27,6 +30,11 @@ class TeamManager extends Component
     // Flash berichten
     public ?string $successMessage = null;
     public ?string $errorMessage = null;
+
+    public function mount(?int $teamId = null): void
+    {
+        $this->teamId = $teamId;
+    }
 
     // Validatieregels nieuw lid
     protected function rules(): array
@@ -53,7 +61,24 @@ class TeamManager extends Component
     #[Computed]
     public function team(): ?Team
     {
-        return auth()->user()?->teams->first();
+        $user = auth()->user();
+        if (! $user) {
+            return null;
+        }
+
+        // Als een specifiek team is meegegeven vanuit de view, gebruik dat
+        if ($this->teamId) {
+            return Team::find($this->teamId);
+        }
+
+        // Fallback: onderwijsleider heeft managedTeams, kwaliteitszorg heeft teams
+        $allTeams = $user->managedTeams->isNotEmpty()
+            ? $user->managedTeams
+            : $user->teams;
+
+        $storedId = session('active_team_id');
+        return ($storedId ? $allTeams->firstWhere('id', $storedId) : null)
+            ?? $allTeams->first();
     }
 
     #[Computed]
