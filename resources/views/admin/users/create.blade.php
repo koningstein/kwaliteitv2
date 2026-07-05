@@ -42,6 +42,7 @@
                         @foreach($roles as $role)
                             <option value="{{ $role->name }}" @selected(old('role') === $role->name)>
                                 {{ match($role->name) {
+                                    'admin'           => 'Beheerder',
                                     'ok_medewerker'   => 'O&K medewerker',
                                     'kwaliteitszorg'  => 'Kwaliteitszorg',
                                     'onderwijsleider' => 'Onderwijsleider',

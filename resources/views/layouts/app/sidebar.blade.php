@@ -12,18 +12,23 @@
 
             <flux:sidebar.nav>
                 <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    @role('ok_medewerker')
+                    @hasanyrole('ok_medewerker|admin')
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    @endrole
+                    @endhasanyrole
                     <flux:sidebar.item icon="academic-cap" :href="route('teacher.dashboard')" :current="request()->routeIs('teacher.*')" wire:navigate>
                         {{ __('Kwaliteit in Beeld') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
-                @role('ok_medewerker')
+                @hasanyrole('ok_medewerker|admin')
                 <flux:sidebar.group :heading="__('Beheer')" class="grid">
+                    @role('admin')
+                    <flux:sidebar.item icon="key" :href="route('admin.permissions.index')" :current="request()->routeIs('admin.permissions.*')" wire:navigate>
+                        {{ __('Permissiebeheer') }}
+                    </flux:sidebar.item>
+                    @endrole
                     <flux:sidebar.item icon="user-group" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.*')" wire:navigate>
                         {{ __('Gebruikers') }}
                     </flux:sidebar.item>
@@ -61,7 +66,7 @@
 {{--                        {{ __('Evaluaties') }}--}}
 {{--                    </flux:sidebar.item>--}}
                 </flux:sidebar.group>
-                @endrole
+                @endhasanyrole
             </flux:sidebar.nav>
 
             <flux:spacer />

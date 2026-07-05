@@ -30,7 +30,7 @@ class UserController extends Controller implements HasMiddleware
 
     public function create()
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = $this->availableRoles();
 
         return view('admin.users.create', compact('roles'));
     }
@@ -51,7 +51,7 @@ class UserController extends Controller implements HasMiddleware
 
     public function edit(User $user)
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = $this->availableRoles();
 
         return view('admin.users.edit', compact('user', 'roles'));
     }
@@ -68,6 +68,17 @@ class UserController extends Controller implements HasMiddleware
 
         return redirect()->route('admin.users.index')
             ->with('success', "Gebruiker \"{$user->name}\" succesvol bijgewerkt.");
+    }
+
+    private function availableRoles()
+    {
+        $query = Role::orderBy('name');
+
+        if (! auth()->user()->hasRole('admin')) {
+            $query->where('name', '!=', 'admin');
+        }
+
+        return $query->get();
     }
 
     public function destroy(User $user)

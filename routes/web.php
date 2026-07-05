@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CriterionScoreController;
 use App\Http\Controllers\Admin\EvaluationController;
 use App\Http\Controllers\Admin\IndicatorController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ReportingPeriodController;
 use App\Http\Controllers\Admin\StandardController;
 use App\Http\Controllers\Admin\TeamController;
@@ -23,11 +24,11 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified', 'role:ok_medewerker'])
+    ->middleware(['auth', 'verified', 'role:ok_medewerker|admin'])
     ->name('dashboard');
 
 
-Route::middleware(['auth', 'verified', 'role:ok_medewerker'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:ok_medewerker|admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('teams', TeamController::class);
     Route::get('teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
@@ -45,11 +46,14 @@ Route::middleware(['auth', 'verified', 'role:ok_medewerker'])->prefix('admin')->
     Route::resource('action-points', ActionPointController::class)->except(['show']);
     Route::resource('criterion-scores', CriterionScoreController::class)->except(['show']);
     Route::resource('evaluations', EvaluationController::class)->except(['show']);
+    Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+    Route::post('permissions', [PermissionController::class, 'store'])->name('permissions.store');
+    Route::delete('permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
 });
 
 require __DIR__.'/settings.php';
 
-Route::middleware(['auth', 'verified', 'role:ok_medewerker|kwaliteitszorg|onderwijsleider|medewerker|directie'])->prefix('teacher')->name('teacher.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:ok_medewerker|admin|kwaliteitszorg|onderwijsleider|medewerker|directie'])->prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/', [TeacherDashboardController::class, 'index'])->name('dashboard');
     Route::get('/themes', [TeacherThemeController::class, 'index'])->name('themes.index');
     Route::get('/themes/{theme}', [TeacherThemeController::class, 'show'])->name('themes.show');

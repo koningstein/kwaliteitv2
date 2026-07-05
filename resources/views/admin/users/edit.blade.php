@@ -44,6 +44,7 @@
                             <option value="{{ $role->name }}"
                                 @selected(old('role', $user->roles->first()?->name) === $role->name)>
                                 {{ match($role->name) {
+                                    'admin'           => 'Beheerder',
                                     'ok_medewerker'   => 'O&K medewerker',
                                     'kwaliteitszorg'  => 'Kwaliteitszorg',
                                     'onderwijsleider' => 'Onderwijsleider',

@@ -42,7 +42,7 @@
 
                             @if(!empty($teamNames) && $teamNames->isNotEmpty())
                                 {{ $teamNames->implode(', ') }}
-                            @elseif($user?->hasRole('ok_medewerker'))
+                            @elseif($user?->hasAnyRole(['ok_medewerker', 'admin']))
                                 Onderwijs &amp; Kwaliteit
                             @elseif($user?->hasRole('directie'))
                                 Directie
@@ -81,12 +81,12 @@
                             Team
                         </a>
                         @endhasanyrole
-                        @role('ok_medewerker')
+                        @hasanyrole('ok_medewerker|admin')
                         <a href="{{ route('dashboard') }}"
                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900">
                             Beheer
                         </a>
-                        @endrole
+                        @endhasanyrole
                     </nav>
 
                     {{-- Scheidingslijn --}}

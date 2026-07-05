@@ -158,5 +158,15 @@ class RolePermissionSeeder extends Seeder
             'edit-own-action-point-dates',
             'view-team-dashboard',
         ]);
+
+        // -----------------------------------------------------------------------
+        // Rol: admin
+        // Heeft alle permissies inclusief manage-permissions.
+        // ok_medewerker krijgt manage-permissions NIET.
+        // -----------------------------------------------------------------------
+        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin->syncPermissions(Permission::all());
+
+        $ok->revokePermissionTo('manage-permissions');
     }
 }

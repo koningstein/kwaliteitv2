@@ -25,6 +25,7 @@ return new class extends Migration
         }
     }
 
+
     public function down(): void
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();

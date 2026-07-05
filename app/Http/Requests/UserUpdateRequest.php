@@ -20,7 +20,11 @@ class UserUpdateRequest extends FormRequest
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'role'     => ['required', 'string', 'exists:roles,name'],
+            'role'     => ['required', 'string', 'exists:roles,name', function ($attribute, $value, $fail) {
+                if ($value === 'admin' && ! auth()->user()->hasRole('admin')) {
+                    $fail('Je hebt geen rechten om de beheerder-rol toe te wijzen.');
+                }
+            }],
         ];
     }
 
