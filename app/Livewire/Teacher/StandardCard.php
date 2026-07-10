@@ -143,14 +143,25 @@ class StandardCard extends Component
     {
         Gate::authorize('create', CriterionScore::class);
 
+        if (($this->scores[$criterionId][$periodId] ?? null) === $status) {
+            CriterionScore::where([
+                'criterion_id'        => $criterionId,
+                'reporting_period_id' => $periodId,
+                'team_id'             => $this->teamId,
+            ])->delete();
+
+            $this->scores[$criterionId][$periodId] = null;
+            return;
+        }
+
         CriterionScore::updateOrCreate(
             [
-                'criterion_id' => $criterionId,
+                'criterion_id'        => $criterionId,
                 'reporting_period_id' => $periodId,
-                'team_id' => $this->teamId,
+                'team_id'             => $this->teamId,
             ],
             [
-                'status' => $status,
+                'status'     => $status,
                 'updated_by' => optional(auth()->user())->id,
             ]
         );

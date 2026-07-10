@@ -49,14 +49,25 @@ class CriterionCard extends Component
     {
         Gate::authorize('create', CriterionScore::class);
 
+        if (($this->scores[$periodId] ?? null) === $status) {
+            CriterionScore::where([
+                'criterion_id'        => $this->criterionId,
+                'reporting_period_id' => $periodId,
+                'team_id'             => $this->teamId,
+            ])->delete();
+
+            $this->scores[$periodId] = null;
+            return;
+        }
+
         CriterionScore::updateOrCreate(
             [
-                'criterion_id' => $this->criterionId,
+                'criterion_id'        => $this->criterionId,
                 'reporting_period_id' => $periodId,
-                'team_id' => $this->teamId,
+                'team_id'             => $this->teamId,
             ],
             [
-                'status' => $status,
+                'status'     => $status,
                 'updated_by' => optional(auth()->user())->id,
             ]
         );
