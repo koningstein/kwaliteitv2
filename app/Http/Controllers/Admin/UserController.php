@@ -18,7 +18,7 @@ class UserController extends Controller implements HasMiddleware
     {
         return [
             new Middleware(PermissionMiddleware::using('manage-users'), only: [
-                'index', 'create', 'store', 'edit', 'update', 'destroy',
+                'index', 'create', 'store', 'edit', 'update', 'destroy', 'teamOverview',
             ]),
         ];
     }
@@ -26,6 +26,11 @@ class UserController extends Controller implements HasMiddleware
     public function index()
     {
         return view('admin.users.index');
+    }
+
+    public function teamOverview()
+    {
+        return view('admin.users.team-overzicht');
     }
 
     public function create()

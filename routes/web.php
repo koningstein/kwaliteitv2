@@ -29,6 +29,7 @@ Route::view('dashboard', 'dashboard')
 
 
 Route::middleware(['auth', 'verified', 'role:ok_medewerker|admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('users/team-overzicht', [UserController::class, 'teamOverview'])->name('users.team-overzicht');
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('teams', TeamController::class);
     Route::get('teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');

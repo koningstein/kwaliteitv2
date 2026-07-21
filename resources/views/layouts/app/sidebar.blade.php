@@ -29,8 +29,11 @@
                         {{ __('Permissiebeheer') }}
                     </flux:sidebar.item>
                     @endrole
-                    <flux:sidebar.item icon="user-group" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.*')" wire:navigate>
+                    <flux:sidebar.item icon="user-group" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit')" wire:navigate>
                         {{ __('Gebruikers') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="user-plus" :href="route('admin.users.team-overzicht')" :current="request()->routeIs('admin.users.team-overzicht')" wire:navigate>
+                        {{ __('Gebruikers & Teams') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="users" :href="route('admin.teams.index')" :current="request()->routeIs('admin.teams.*')" wire:navigate>
                         {{ __('Teams') }}

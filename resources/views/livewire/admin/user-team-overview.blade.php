@@ -1,0 +1,99 @@
+<div>
+@php
+    $rolLabels = [
+        'admin'           => ['label' => 'Beheerder',        'color' => 'bg-red-50 text-red-700 ring-red-600/20 dark:bg-red-900/30 dark:text-red-300 dark:ring-red-500/30'],
+        'ok_medewerker'   => ['label' => 'O&K medewerker',  'color' => 'bg-purple-50 text-purple-700 ring-purple-600/20 dark:bg-purple-900/30 dark:text-purple-300 dark:ring-purple-500/30'],
+        'kwaliteitszorg'  => ['label' => 'Kwaliteitszorg',  'color' => 'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30'],
+        'onderwijsleider' => ['label' => 'Onderwijsleider', 'color' => 'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-500/30'],
+        'medewerker'      => ['label' => 'Medewerker',      'color' => 'bg-zinc-100 text-zinc-600 ring-zinc-500/20 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-500/30'],
+        'directie'        => ['label' => 'Directie',        'color' => 'bg-orange-50 text-orange-700 ring-orange-600/20 dark:bg-orange-900/30 dark:text-orange-300 dark:ring-orange-500/30'],
+    ];
+@endphp
+
+    {{-- Filters --}}
+    <div class="mb-4 flex gap-3">
+        <input type="text"
+               wire:model.live.debounce.300ms="search"
+               placeholder="Zoek op naam of e-mail..."
+               class="flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100 dark:placeholder-zinc-400" />
+        <select wire:model.live="teamFilter"
+                class="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100">
+            <option value="">Alle teams</option>
+            @foreach($teams as $team)
+                <option value="{{ $team->id }}">{{ $team->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    {{-- Tabel --}}
+    <div class="overflow-x-auto overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-700">
+        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Naam</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">E-mail</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Systeemrol</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Docent in</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Teamleider van</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 bg-white dark:divide-zinc-700 dark:bg-zinc-900">
+                @forelse($users as $user)
+                    @php
+                        $rolKey  = $user->roles->first()?->name;
+                        $rolInfo = $rolLabels[$rolKey] ?? ['label' => '—', 'color' => 'bg-zinc-100 text-zinc-600 ring-zinc-500/20'];
+                    @endphp
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                        <td class="whitespace-nowrap px-6 py-4 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                            {{ $user->name }}
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                            {{ $user->email }}
+                        </td>
+                        <td class="whitespace-nowrap px-6 py-4">
+                            <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset {{ $rolInfo['color'] }}">
+                                {{ $rolInfo['label'] }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($user->teams->isNotEmpty())
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($user->teams as $team)
+                                        <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300 dark:ring-blue-500/30">
+                                            {{ $team->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-sm text-zinc-400 dark:text-zinc-600">—</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
+                            @if($user->managedTeams->isNotEmpty())
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($user->managedTeams as $team)
+                                        <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-900/30 dark:text-green-300 dark:ring-green-500/30">
+                                            {{ $team->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-sm text-zinc-400 dark:text-zinc-600">—</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                            Geen gebruikers gevonden.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4">
+        {{ $users->links() }}
+    </div>
+</div>
