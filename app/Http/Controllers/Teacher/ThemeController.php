@@ -39,7 +39,7 @@ class ThemeController extends Controller implements HasMiddleware
         $teamIdParam = $request->query('team');
         if ($teamIdParam) {
             $activeTeam = $teams->firstWhere('id', (int) $teamIdParam) ?? $teams->first();
-            session(['active_team_id' => $activeTeam->id]);
+            session(['active_team_id' => $activeTeam?->id]);
         } else {
             $storedId   = session('active_team_id');
             $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
@@ -65,9 +65,6 @@ class ThemeController extends Controller implements HasMiddleware
 
         if ($isGlobalViewer) {
             $teams = Team::orderBy('name')->get();
-        } elseif ($isMedewerker) {
-            // Medewerker ziet alleen zijn eigen teams; team-tabs tonen bij meerdere teams
-            $teams = $user?->teams()->orderBy('name')->get() ?? collect();
         } else {
             $managed = $user?->managedTeams()->orderBy('name')->get() ?? collect();
             $teams   = $managed->isNotEmpty()
@@ -80,7 +77,7 @@ class ThemeController extends Controller implements HasMiddleware
         $requestedTeamId = $request->query('team');
         if ($requestedTeamId) {
             $activeTeam = $teams->firstWhere('id', (int) $requestedTeamId) ?? $teams->first();
-            session(['active_team_id' => $activeTeam->id]);
+            session(['active_team_id' => $activeTeam?->id]);
         } else {
             $storedId   = session('active_team_id');
             $activeTeam = ($storedId ? $teams->firstWhere('id', $storedId) : null) ?? $teams->first();
