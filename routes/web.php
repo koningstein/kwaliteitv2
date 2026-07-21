@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActionPointController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\ActionPointStatusController;
 use App\Http\Controllers\Admin\CriterionController;
 use App\Http\Controllers\Admin\CriterionScoreController;
@@ -50,6 +51,8 @@ Route::middleware(['auth', 'verified', 'role:ok_medewerker|admin'])->prefix('adm
     Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
     Route::post('permissions', [PermissionController::class, 'store'])->name('permissions.store');
     Route::delete('permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+    Route::get('backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::get('backup/download', [BackupController::class, 'download'])->name('backup.download');
 });
 
 require __DIR__.'/settings.php';

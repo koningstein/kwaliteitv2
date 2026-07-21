@@ -28,6 +28,9 @@
                     <flux:sidebar.item icon="key" :href="route('admin.permissions.index')" :current="request()->routeIs('admin.permissions.*')" wire:navigate>
                         {{ __('Permissiebeheer') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="circle-stack" :href="route('admin.backup.index')" :current="request()->routeIs('admin.backup.*')" wire:navigate>
+                        {{ __('Database backup') }}
+                    </flux:sidebar.item>
                     @endrole
                     <flux:sidebar.item icon="user-group" :href="route('admin.users.index')" :current="request()->routeIs('admin.users.index') || request()->routeIs('admin.users.create') || request()->routeIs('admin.users.edit')" wire:navigate>
                         {{ __('Gebruikers') }}
